@@ -1,0 +1,209 @@
+{
+  "chart": {
+    "title": "Vaccination coverage",
+    "subtitle": "Share of one-year-olds who have been immunized against a disease or a pathogen.",
+    "note": "This includes [diphtheria](#dod:diphtheria), [pertussis](#dod:pertussis) and [tetanus](#dod:tetanus) (3rd dose), [measles](#dod:measles) (1st dose), [hepatitis B](#dod:hepatitis-virus) (3rd dose), [polio](#dod:polio) (3rd dose), Haemophilus influenzae b (3rd dose), [rubella](#dod:rubella) (1st dose), [rotavirus](#dod:rotavirus) (final dose), [pneumococcal vaccine](#dod:pneumococcal-conjugate-vaccine) (3rd dose), and [inactivated polio](#dod:inactivated-polio-vaccine) (first dose).",
+    "citation": "WHO & UNICEF (2025); UN, World Population Prospects (2024)",
+    "originalChartUrl": "https://ourworldindata.org/grapher/global-vaccination-coverage?v=1&csvType=full&useColumnShortNames=false",
+    "selection": [
+      "World"
+    ]
+  },
+  "columns": {
+    "Share of one-year-olds who have had three doses of the hepatitis B vaccine": {
+      "titleShort": "Share of one-year-olds who have had three doses of the hepatitis B vaccine",
+      "titleLong": "Share of one-year-olds who have had three doses of the hepatitis B vaccine",
+      "descriptionShort": "Share of one-year-olds who have had three doses of the hepatitis B vaccine in a given year.",
+      "descriptionKey": [
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1985-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077435,
+      "shortName": "coverage__antigen_hepb3",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had three doses of the hepatitis B vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077435.metadata.json"
+    },
+    "Share of one-year-olds vaccinated against Haemophilus influenzae type b": {
+      "titleShort": "Share of one-year-olds vaccinated against Haemophilus influenzae type b",
+      "titleLong": "Share of one-year-olds vaccinated against Haemophilus influenzae type b",
+      "descriptionShort": "Share of one-year-olds who have had three doses of Haemophilus influenzae type b vaccine in a given year.",
+      "descriptionKey": [
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1990-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077437,
+      "shortName": "coverage__antigen_hib3",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds vaccinated against Haemophilus influenzae type b” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077437.metadata.json"
+    },
+    "Share of one-year-olds who have had the one dose of the inactivated polio vaccine": {
+      "titleShort": "Share of one-year-olds who have had the one dose of the inactivated polio vaccine",
+      "titleLong": "Share of one-year-olds who have had the one dose of the inactivated polio vaccine",
+      "descriptionShort": "Share of one-year-olds who have had the first dose of the inactivated polio vaccine in a given year.",
+      "descriptionKey": [
+        "In countries where both types of polio vaccine are used — IPV (inactivated polio vaccine, given as an injection) and OPV (oral polio vaccine, given as drops) — WHO and UNICEF count any baby under 1 year old who received at least one routine dose of IPV in their estimate of “first dose” coverage (meaning the first dose of IPV). In countries that only use IPV, “first dose” simply refers to the first IPV dose given.",
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "2015-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077439,
+      "shortName": "coverage__antigen_ipv1",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had the one dose of the inactivated polio vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077439.metadata.json"
+    },
+    "Share of one-year-olds who have had one dose of the measles vaccine": {
+      "titleShort": "Share of one-year-olds who have had one dose of the measles vaccine",
+      "titleLong": "Share of one-year-olds who have had one dose of the measles vaccine",
+      "descriptionShort": "Share of one-year-olds who have had the first dose of the measles vaccine in a given year.",
+      "descriptionKey": [
+        "Measles is one of the most contagious diseases. The first dose of measles vaccine is critical for building immunity. In countries where the national schedule recommends the first dose at 12 months or later based on local epidemiology, these estimates reflect the percentage of children who received their first dose as recommended.",
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1980-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077440,
+      "shortName": "coverage__antigen_mcv1",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had one dose of the measles vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077440.metadata.json"
+    },
+    "Share of one-year-olds who have had the third dose of the pneumococcal conjugate vaccine": {
+      "titleShort": "Share of one-year-olds who have had the third dose of the pneumococcal conjugate vaccine",
+      "titleLong": "Share of one-year-olds who have had the third dose of the pneumococcal conjugate vaccine",
+      "descriptionShort": "Share of one-year-olds who have had the third dose of the pneumococcal conjugate vaccine in a given year.",
+      "descriptionKey": [
+        "In some countries the vaccine schedule may recommend two doses in before the age of one and a booster at a later date. These later vaccine schedules are also counted under this variable.",
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "2008-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077443,
+      "shortName": "coverage__antigen_pcv3",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had the third dose of the pneumococcal conjugate vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077443.metadata.json"
+    },
+    "Share of one-year-olds who have had three doses of the polio vaccine": {
+      "titleShort": "Share of one-year-olds who have had three doses of the polio vaccine",
+      "titleLong": "Share of one-year-olds who have had three doses of the polio vaccine",
+      "descriptionShort": "Share of one-year-olds who have had the third dose of either the oral or inactivated polio vaccine in a given year.",
+      "descriptionKey": [
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1980-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077444,
+      "shortName": "coverage__antigen_pol3",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had three doses of the polio vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077444.metadata.json"
+    },
+    "Share of one-year-olds vaccinated against rubella": {
+      "titleShort": "Share of one-year-olds vaccinated against rubella",
+      "titleLong": "Share of one-year-olds vaccinated against rubella",
+      "descriptionShort": "Share of one-year-olds who have had one dose of rubella vaccine in a given year.",
+      "descriptionKey": [
+        "Rubella coverage estimates are based on WHO and UNICEF data for the first dose of the measles-rubella vaccine, as the WHO recommends this combined vaccine.",
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1980-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077445,
+      "shortName": "coverage__antigen_rcv1",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds vaccinated against rubella” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077445.metadata.json"
+    },
+    "Share of one-year-olds vaccinated against rotavirus": {
+      "titleShort": "Share of one-year-olds vaccinated against rotavirus",
+      "titleLong": "Share of one-year-olds vaccinated against rotavirus",
+      "descriptionShort": "Share of one-year-olds who have had the final recommended dose (2nd or 3rd) of the rotavirus vaccine in a given year.",
+      "descriptionKey": [
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "2006-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077446,
+      "shortName": "coverage__antigen_rotac",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds vaccinated against rotavirus” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077446.metadata.json"
+    },
+    "Share of one-year-olds who have had three doses of the diphtheria, tetanus and pertussis vaccine": {
+      "titleShort": "Share of one-year-olds who have had three doses of the diphtheria, tetanus and pertussis vaccine",
+      "titleLong": "Share of one-year-olds who have had three doses of the diphtheria, tetanus and pertussis vaccine",
+      "descriptionShort": "Share of one-year-olds who have had three doses of the combined diphtheria, tetanus and [pertussis](#dod:pertussis) vaccine in a given year.",
+      "descriptionKey": [
+        "This chart shows official estimates of national immunization coverage published by the WHO and UNICEF. The estimates include all WHO member states, even those that did not report 2023 data. For non-reporting countries, WHO uses statistical methods to extrapolate from previously reported data, ensuring global coverage can be assessed.",
+        "Global and regional vaccination coverage is calculated using population-weighted averages. In 2023, approximately 5% of countries did not report data, requiring extrapolation from their 2022 data to maintain complete global estimates.",
+        "These estimates combine several sources: official administrative data from health facilities, coverage surveys that meet WHO quality standards, and other relevant information like vaccine supply issues or schedule changes. The accuracy of these estimates depends on how complete and reliable each country’s reporting systems are."
+      ],
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "1980-2024",
+      "type": "Numeric",
+      "owidVariableId": 1077436,
+      "shortName": "coverage__antigen_dtpcv3",
+      "lastUpdated": "2025-07-15",
+      "nextUpdate": "2026-07-15",
+      "citationShort": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data",
+      "citationLong": "WHO & UNICEF (2025); UN, World Population Prospects (2024) – processed by Our World in Data. “Share of one-year-olds who have had three doses of the diphtheria, tetanus and pertussis vaccine” [dataset]. WHO & UNICEF, “WHO Immunization Data - Vaccination coverage”; United Nations, “World Population Prospects”; United Nations, “World Population Prospects - Interim Update” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1077436.metadata.json"
+    }
+  },
+  "dateDownloaded": "2026-04-29",
+  "activeFilters": {}
+}
