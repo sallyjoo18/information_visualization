@@ -1,0 +1,22 @@
+---
+title: "Initial Exploration"
+format: html
+author: "Team 15"
+---
+
+
+
+# Description of Dataset 
+
+
+**Vaccination Coverage, World, 1980 to 2024**
+
+The dataset our group chose to explore is the [Vaccination coverage, World, 1980 to 2024](https://ourworldindata.org/grapher/global-vaccination-coverage?v=1&csvType=full&useColumnShortNames=false) data from the website [Our World in Data](https://ourworldindata.org/).
+
+
+
+
+
+
+
+# Communication Goals 
