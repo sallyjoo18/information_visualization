@@ -4,6 +4,17 @@ format: html
 author: "Team 15"
 ---
 
+```{r}
+#| label: loading-materials 
+#| echo: false
+
+vaccine <- read.csv("global-vaccination-coverage.csv", sep = ",")
+
+load(here::here("data_exploration/correlation_graph.png"))
+load(here::here("data_exploration/summary_table.rda"))
+load(here::here("data_exploration/na_over_time.png"))
+```
+
 
 
 # Description of Dataset
@@ -51,6 +62,48 @@ A few characteristics of the data that will matter for how we visualize it:
 - **The 2023 and 2024 numbers are partly estimated.** For countries that did not report on time, WHO extrapolates from previous years' data, so the most recent two years should be read as best-available estimates rather than firm measurements.
 
 
+# Initial Exploration 
+
+For our initial exploration of the data, we conducted a brief exploratory data analysis involving summarizing the dataset information, searching for numerical correlations between numerical variables, seeing the nature of the NA values, etc. 
+
+```{r}
+#| label: summary
+#| echo: false
+
+summary_table 
+```
+
+
+Key insights from the summary output that stand out immediately are the following: 
+
+- Polio (Pol3) and DTP3 are the most complete --> only 24 and 29 missing values respectively, meaning these are tracked nearly universally.
+
+- IPV1, Rotavirus, and PCV3 have massive gaps (7,000+ NAs), likely because these vaccines were introduced more recently
+
+- Median coverage across most vaccines hovers around 85–91%, but means are lower (78–84%), suggesting a skewed distribution where a subset of countries pull the average down
+
+- All vaccines max out at 99%, and minimums hit 0%, so there's a full spectrum of coverage quality represented 
+
+
+
+We went more in-depth with the prevalence of NA values in our dataset, and the following graph illustrates the NA values over time: 
+```{r}
+#| label: na
+#| echo: false
+
+na_over_time
+```
+
+
+
+In terms of viewing correlation between variables, the following observations were made about the dataset: 
+
+
+- Very strong correlations (r > 0.90: DTP3, Polio, and HepB have high values of 0.96, 0.95, and 0.92. These are generally vaccines that have been administered together for decades, so countries that do well on one tend to do well on all three
+
+- Strong correlations (r = 0.70–0.90): Measles (MCV1) correlates strongly with DTP3 (0.87), Polio (0.86), and HepB (0.84), suggesting it follows the same national-level delivery infrastructure. Rubella (RCV1) is moderately-strongly tied to Measles (0.78).
+
+- Cluster patterns: generally clusters are either popularly administered vaccines such as Polio and Measles or newer vaccines
 
 
 # Communication Goals 

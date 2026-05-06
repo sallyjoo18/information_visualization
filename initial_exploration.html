@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.9.37">
+<meta name="generator" content="quarto-1.8.26">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -10,9 +10,6 @@
 
 <title>Initial Exploration</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -30,14 +27,15 @@ ul.task-list li input[type="checkbox"] {
 <script src="initial_exploration_files/libs/clipboard/clipboard.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="initial_exploration_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="initial_exploration_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="initial_exploration_files/libs/quarto-html/popper.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/anchor.min.js"></script>
 <link href="initial_exploration_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="initial_exploration_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="initial_exploration_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="initial_exploration_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="initial_exploration_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="initial_exploration_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="initial_exploration_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -172,6 +170,163 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>The 2023 and 2024 numbers are partly estimated.</strong> For countries that did not report on time, WHO extrapolates from previous years’ data, so the most recent two years should be read as best-available estimates rather than firm measurements.</li>
 </ul>
 </section>
+</section>
+<section id="initial-exploration" class="level1">
+<h1>Initial Exploration</h1>
+<p>For our initial exploration of the data, we conducted a brief exploratory data analysis involving summarizing the dataset information, searching for numerical correlations between numerical variables, seeing the nature of the NA values, etc.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Entity</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Code</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Year</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Hepatitis.B..HepB3.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">H..influenza.type.b..Hib3.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Inactivated.polio.vaccine..IPV1.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Measles..first.dose..MCV1.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Pneumococcal.vaccine..PCV3.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Polio..Pol3.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Rubella..RCV1.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Rotavirus..RotaC.</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Diptheria.tetanus.pertussis..DTP3.</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Length:9203</td>
+<td style="text-align: left;">Length:9203</td>
+<td style="text-align: left;">Min. :1980</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 0.00</td>
+<td style="text-align: left;">Min. : 1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Class :character</td>
+<td style="text-align: left;">Class :character</td>
+<td style="text-align: left;">1st Qu.:1993</td>
+<td style="text-align: left;">1st Qu.:73.00</td>
+<td style="text-align: left;">1st Qu.:73.00</td>
+<td style="text-align: left;">1st Qu.:77.00</td>
+<td style="text-align: left;">1st Qu.:68.00</td>
+<td style="text-align: left;">1st Qu.:64.00</td>
+<td style="text-align: left;">1st Qu.:71.53</td>
+<td style="text-align: left;">1st Qu.:78.00</td>
+<td style="text-align: left;">1st Qu.:46.00</td>
+<td style="text-align: left;">1st Qu.:71.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">Mode :character</td>
+<td style="text-align: left;">Mode :character</td>
+<td style="text-align: left;">Median :2003</td>
+<td style="text-align: left;">Median :89.00</td>
+<td style="text-align: left;">Median :90.00</td>
+<td style="text-align: left;">Median :92.00</td>
+<td style="text-align: left;">Median :86.00</td>
+<td style="text-align: left;">Median :84.00</td>
+<td style="text-align: left;">Median :88.00</td>
+<td style="text-align: left;">Median :91.00</td>
+<td style="text-align: left;">Median :74.00</td>
+<td style="text-align: left;">Median :88.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Mean :2003</td>
+<td style="text-align: left;">Mean :78.97</td>
+<td style="text-align: left;">Mean :78.73</td>
+<td style="text-align: left;">Mean :83.58</td>
+<td style="text-align: left;">Mean :78.19</td>
+<td style="text-align: left;">Mean :73.66</td>
+<td style="text-align: left;">Mean :79.71</td>
+<td style="text-align: left;">Mean :78.66</td>
+<td style="text-align: left;">Mean :63.83</td>
+<td style="text-align: left;">Mean :79.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">3rd Qu.:2014</td>
+<td style="text-align: left;">3rd Qu.:96.00</td>
+<td style="text-align: left;">3rd Qu.:96.00</td>
+<td style="text-align: left;">3rd Qu.:98.00</td>
+<td style="text-align: left;">3rd Qu.:95.00</td>
+<td style="text-align: left;">3rd Qu.:93.00</td>
+<td style="text-align: left;">3rd Qu.:95.03</td>
+<td style="text-align: left;">3rd Qu.:96.00</td>
+<td style="text-align: left;">3rd Qu.:88.00</td>
+<td style="text-align: left;">3rd Qu.:95.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">Max. :2024</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.00</td>
+<td style="text-align: left;">Max. :99.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">NA's :3559</td>
+<td style="text-align: left;">NA's :4439</td>
+<td style="text-align: left;">NA's :7146</td>
+<td style="text-align: left;">NA's :155</td>
+<td style="text-align: left;">NA's :6943</td>
+<td style="text-align: left;">NA's :24</td>
+<td style="text-align: left;">NA's :3722</td>
+<td style="text-align: left;">NA's :7484</td>
+<td style="text-align: left;">NA's :29</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Key insights from the summary output that stand out immediately are the following:</p>
+<ul>
+<li><p>Polio (Pol3) and DTP3 are the most complete –&gt; only 24 and 29 missing values respectively, meaning these are tracked nearly universally.</p></li>
+<li><p>IPV1, Rotavirus, and PCV3 have massive gaps (7,000+ NAs), likely because these vaccines were introduced more recently</p></li>
+<li><p>Median coverage across most vaccines hovers around 85–91%, but means are lower (78–84%), suggesting a skewed distribution where a subset of countries pull the average down</p></li>
+<li><p>All vaccines max out at 99%, and minimums hit 0%, so there’s a full spectrum of coverage quality represented</p></li>
+</ul>
+<p>We went more in-depth with the prevalence of NA values in our dataset, and the following graph illustrates the NA values over time:</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="initial_exploration_files/figure-html/na-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In terms of viewing correlation between variables, the following observations were made about the dataset:</p>
+<ul>
+<li><p>Very strong correlations (r &gt; 0.90: DTP3, Polio, and HepB have high values of 0.96, 0.95, and 0.92. These are generally vaccines that have been administered together for decades, so countries that do well on one tend to do well on all three</p></li>
+<li><p>Strong correlations (r = 0.70–0.90): Measles (MCV1) correlates strongly with DTP3 (0.87), Polio (0.86), and HepB (0.84), suggesting it follows the same national-level delivery infrastructure. Rubella (RCV1) is moderately-strongly tied to Measles (0.78).</p></li>
+<li><p>Cluster patterns: generally clusters are either popularly administered vaccines such as Polio and Measles or newer vaccines</p></li>
+</ul>
 </section>
 <section id="communication-goals" class="level1">
 <h1>Communication Goals</h1>
