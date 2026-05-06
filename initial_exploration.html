@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.26">
+<meta name="generator" content="quarto-1.9.37">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -10,6 +10,9 @@
 
 <title>Initial Exploration</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -27,15 +30,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="initial_exploration_files/libs/clipboard/clipboard.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/quarto.js" type="module"></script>
 <script src="initial_exploration_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="initial_exploration_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="initial_exploration_files/libs/quarto-html/popper.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/tippy.umd.min.js"></script>
 <script src="initial_exploration_files/libs/quarto-html/anchor.min.js"></script>
 <link href="initial_exploration_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="initial_exploration_files/libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="initial_exploration_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="initial_exploration_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="initial_exploration_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="initial_exploration_files/libs/bootstrap/bootstrap-9e3ffae467580fdb927a41352e75a2e0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="initial_exploration_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
@@ -74,7 +76,102 @@ ul.task-list li input[type="checkbox"] {
 <section id="description-of-dataset" class="level1">
 <h1>Description of Dataset</h1>
 <p><strong>Vaccination Coverage, World, 1980 to 2024</strong></p>
-<p>The dataset our group chose to explore is the <a href="https://ourworldindata.org/grapher/global-vaccination-coverage?v=1&amp;csvType=full&amp;useColumnShortNames=false">Vaccination coverage, World, 1980 to 2024</a> data from the website <a href="https://ourworldindata.org/">Our World in Data</a>.</p>
+<p>The dataset our group chose to explore is the <a href="https://ourworldindata.org/grapher/global-vaccination-coverage?v=1&amp;csvType=full&amp;useColumnShortNames=false">Vaccination coverage, World, 1980 to 2024</a> data, published by <a href="https://ourworldindata.org/">Our World in Data</a>. It tracks the share of one-year-olds who have received each of nine routine childhood vaccines, reported every year from 1980 to 2024 for almost every country in the world. The underlying numbers come from WHO and UNICEF’s joint immunization estimates, with population data from the UN.</p>
+<section id="why-we-chose-this-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="why-we-chose-this-dataset">Why we chose this dataset</h2>
+<p>We picked this dataset for the following reasons:</p>
+<ol type="1">
+<li><strong>Public-health relevance.</strong> COVID-19 was not that long ago, so public health and vaccination still feel relevant to almost everyone. Childhood vaccination is also one of the most cost-effective health interventions in modern history, and most readers have either been vaccinated under these schedules themselves or have young relatives who are right now. Between recent outbreaks worldwide, the topic still frequently pops. up in the news.</li>
+<li><strong>Lots of interacting variables to explore.</strong> The dataset combines many countries, several different vaccines, and 45 years of time, which means there are a lot of angles we can dig into. We already had some questions in mind before we started, such as whether certain diseases are more prevalent in some regions of the world than others, or whether vaccination coverage might correlate with a country’s GDP, healthcare spending, or level of conflict. Having all of these variables sitting next to each other gives us the chance to actually test those ideas with the data instead of just speculating about them.</li>
+<li><strong>Good fit for visualization.</strong> The data is long, spanning 45 years, and wide, covering multiple vaccines across roughly 200 countries. That means it can support many different chart types, including time series, small multiples, choropleth maps, and ranked bars, and it naturally invites a story arc that moves between the global picture and country-level detail. It also feels both varied and sufficient, so we are confident we will not run out of material before our final submission.</li>
+</ol>
+</section>
+<section id="structure-of-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="structure-of-the-data">Structure of the data</h2>
+<p>The file we are working with, <code>global-vaccination-coverage.csv</code>, has <strong>9,202 rows</strong> and <strong>12 columns</strong>. Each row is one observation for a single <em>entity</em> in a single <em>year</em>. The columns break down as follows:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>Entity</code></td>
+<td>character</td>
+<td>Name of the country or region, for example <code>"United States"</code>, <code>"World"</code>, or <code>"South Asia (UNICEF)"</code>. 218 unique entities total.</td>
+</tr>
+<tr class="even">
+<td><code>Code</code></td>
+<td>character</td>
+<td><a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3">ISO alpha-3</a> country code, for example <code>"USA"</code>. Blank for the 7 grouping rows.</td>
+</tr>
+<tr class="odd">
+<td><code>Year</code></td>
+<td>integer</td>
+<td>Calendar year of the observation, ranging from 1980 to 2024.</td>
+</tr>
+<tr class="even">
+<td><code>Hepatitis B (HepB3)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received three doses of the hepatitis B vaccine. Date range: 1985–2024.</td>
+</tr>
+<tr class="odd">
+<td><code>H. influenza type b (Hib3)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received three doses of the Haemophilus influenzae type b vaccine. Date range: 1990–2024.</td>
+</tr>
+<tr class="even">
+<td><code>Inactivated polio vaccine (IPV1)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received the first dose of the inactivated polio vaccine. Date range: 2015–2024.</td>
+</tr>
+<tr class="odd">
+<td><code>Measles, first dose (MCV1)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received the first dose of a measles-containing vaccine. Date range: 1980–2024.</td>
+</tr>
+<tr class="even">
+<td><code>Pneumococcal vaccine (PCV3)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received the third dose of the pneumococcal conjugate vaccine. Date range: 2008–2024.</td>
+</tr>
+<tr class="odd">
+<td><code>Polio (Pol3)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received three doses of either oral or inactivated polio vaccine. Date range: 1980–2024.</td>
+</tr>
+<tr class="even">
+<td><code>Rubella (RCV1)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received one dose of a rubella-containing vaccine. In practice this is almost always the combined measles-rubella vaccine. Date range: 1980–2024.</td>
+</tr>
+<tr class="odd">
+<td><code>Rotavirus (RotaC)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who completed the recommended rotavirus vaccine schedule. Date range: 2006–2024.</td>
+</tr>
+<tr class="even">
+<td><code>Diptheria/tetanus/pertussis (DTP3)</code></td>
+<td>numeric, %</td>
+<td>Share of one-year-olds who received three doses of the combined diphtheria-tetanus-pertussis vaccine. Date range: 1980–2024.</td>
+</tr>
+</tbody>
+</table>
+<p>All nine vaccine columns are numeric percentages bounded between 0 and 100.</p>
+</section>
+<section id="things-to-be-careful-about" class="level2">
+<h2 class="anchored" data-anchor-id="things-to-be-careful-about">Things to be careful about</h2>
+<p>A few characteristics of the data that will matter for how we visualize it:</p>
+<ul>
+<li><strong>The percentages are out of one-year-olds, not the whole population.</strong> Each value describes the share of children who turned one in that calendar year and received the vaccine, not the share of the country’s overall population. That distinction is worth keeping in mind whenever we describe a number for a non-technical audience.</li>
+<li><strong>The “Entity” column mixes different levels.</strong> Most rows are countries, but some are larger groupings: six UNICEF regions like <code>"South Asia (UNICEF)"</code>, the income group <code>"Middle-income countries"</code>, and a global <code>"World"</code> row. For any country-level analysis we will have to filter those grouping rows out, otherwise we end up averaging countries together with regions they already belong to and double-counting.</li>
+<li><strong>Different vaccines start at different years.</strong> The diphtheria-tetanus-pertussis, polio, measles, and rubella vaccines go back to 1980, but the pneumococcal, rotavirus, and inactivated polio vaccines were not tracked globally until much later, so those columns are mostly empty for the early years. A blank cell does not mean coverage was 0%. It usually means the vaccine was not part of the routine schedule yet, so we should leave those gaps as gaps in our charts rather than treating them as zeros.</li>
+<li><strong>The 2023 and 2024 numbers are partly estimated.</strong> For countries that did not report on time, WHO extrapolates from previous years’ data, so the most recent two years should be read as best-available estimates rather than firm measurements.</li>
+</ul>
+</section>
 </section>
 <section id="communication-goals" class="level1">
 <h1>Communication Goals</h1>
