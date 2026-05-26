@@ -27,7 +27,7 @@ The dataset our group chose to explore is the [Vaccination coverage, World, 1980
 
 We picked this dataset for the following reasons:
 
-1. **Public-health relevance.** COVID-19 was not that long ago, so public health and vaccination still feel relevant to almost everyone. Childhood vaccination is also one of the most cost-effective health interventions in modern history, and most readers have either been vaccinated under these schedules themselves or have young relatives who are right now. Between recent outbreaks worldwide, the topic still frequently pops. up in the news.
+1. **Public-health relevance.** COVID-19 was not that long ago, so public health and vaccination still feel relevant to almost everyone. Childhood vaccination is also one of the most cost-effective health interventions in modern history, and most readers have either been vaccinated under these schedules themselves or have young relatives who are right now. Between recent outbreaks worldwide, the topic still frequently pops up in the news.
 2. **Lots of interacting variables to explore.** The dataset combines many countries, several different vaccines, and 45 years of time, which means there are a lot of angles we can dig into. We already had some questions in mind before we started, such as whether certain diseases are more prevalent in some regions of the world than others, or whether vaccination coverage might correlate with a country's GDP, healthcare spending, or level of conflict. Having all of these variables sitting next to each other gives us the chance to actually test those ideas with the data instead of just speculating about them.
 3. **Good fit for visualization.** The data is long, spanning 45 years, and wide, covering multiple vaccines across roughly 200 countries. That means it can support many different chart types, including time series, small multiples, choropleth maps, and ranked bars, and it naturally invites a story arc that moves between the global picture and country-level detail. It also feels both varied and sufficient, so we are confident we will not run out of material before our final submission.
 
@@ -107,3 +107,21 @@ In terms of viewing correlation between variables, the following observations we
 
 
 # Communication Goals 
+
+**1. Trace the dramatic rise in global childhood vaccination coverage over the past four decades**
+
+One of our primary goals is to communicate the dramatic long-term rise in childhood vaccination coverage worldwide from 1980 to 2024. Vaccines such as measles (MCV1), hepatitis B (HepB3), and rubella (RCV1), which once had limited or inconsistent coverage, now reach a large majority of one-year-olds in many countries. This trend is supported by the high median coverage values in our summary statistics and the strong upward patterns visible across vaccines over time. Through this goal, we want viewers to understand vaccination programs as one of the most successful public-health efforts in modern history while also comparing these long-term trends against international benchmarks such as the 90% coverage target.
+
+**2. Highlight inequalities in vaccination coverage across regions and countries**
+
+A second communication goal is to highlight the unequal distribution of vaccination coverage across different regions and countries. While global averages suggest strong overall progress, we expect substantial variation between countries with different levels of healthcare access, economic development, and public-health infrastructure. By comparing regional and country-level patterns, we hope to show that some parts of the world consistently achieve high vaccination rates while others continue to lag behind. This goal aims to help viewers look beyond global averages and recognize the geographic inequalities that still shape access to routine childhood immunization.
+
+**3. Explore how wealth, healthcare infrastructure, and economic and political conditions influence vaccination outcomes**
+
+Our third communication goal is to investigate how broader social, economic, and political factors may influence vaccination coverage. We are interested in exploring whether vaccination rates correlate with indicators such as GDP, healthcare spending, or levels of political instability and conflict. The strong correlations we observed between long-established vaccines such as DTP3, Polio (Pol3), HepB3, and Measles (MCV1) suggest that vaccination success is often tied to the strength of a country’s healthcare infrastructure rather than to isolated disease-specific efforts. Through this analysis, we hope to communicate that vaccination coverage reflects larger structural conditions related to development, governance, and public-health capacity and is heavily intertwined with inequality.
+
+**4. Examine how the COVID-19 pandemic disrupted global vaccination progress**
+
+Our final communication goal is to examine how the COVID-19 pandemic disrupted decades of global vaccination progress and how recovery patterns have differed across countries and vaccine types. We are particularly interested in identifying periods where vaccination coverage stagnated or declined and determining whether some regions recovered more quickly than others in the years following the pandemic. By comparing pre-pandemic and post-pandemic trends, we hope to show that even long-standing vaccination systems remain vulnerable to large-scale global disruptions. This goal will help frame vaccination coverage not as guaranteed progress, but as an ongoing public-health challenge that requires continued investment and resilience.
+
+**Together, these communication goals create a narrative arc that moves from global progress in childhood vaccination to the inequalities and structural factors that shape coverage across countries and regions, ending with the disruptions caused by the COVID-19 pandemic. Through this progression, we hope to communicate both the remarkable success of global immunization efforts and the ongoing challenges that continue to affect vaccination access and stability worldwide.**
