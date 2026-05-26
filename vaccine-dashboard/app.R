@@ -6,32 +6,11 @@ library(tidyverse)
 library(plotly)
 library(leaflet)
 library(countrycode)
-library(maps)
 
 # Load data
-vaccine <- read.csv("global-vaccination-coverage.csv")
+load("data/vaccine_data.rda")
+vax_map <- vax_long
 
-# Pivot to long format
-vax_long <- vaccine |>
-  pivot_longer(
-    cols = matches("HepB3|Hib3|IPV1|MCV1|PCV3|Pol3|RCV1|RotaC|DTP3"),
-    names_to = "vaccine",
-    values_to = "coverage"
-  )
-
-
-# Add coordinates
-coords <- map_data("world") |>
-  group_by(region) |>
-  summarize(
-    latitude = mean(lat, na.rm = TRUE),
-    longitude = mean(long, na.rm = TRUE)
-  )
-
-coords$Entity <- countrycode(coords$region, "country.name", "country.name")
-
-vax_long <- vax_long |>
-  left_join(coords, by = "Entity")
 
 # UI
 ui <- fluidPage(
@@ -41,16 +20,16 @@ ui <- fluidPage(
 
   sidebarLayout(
     sidebarPanel(
-      selectInput("vax", "Vaccine:", choices = unique(vax_long$vaccine)),
+      selectInput("vax", "Vaccine:", choices = unique(vax_map$vaccine)),
       sliderInput("year", "Year:",
-                  min = min(vax_long$Year),
-                  max = max(vax_long$Year),
+                  min = min(vax_map$Year),
+                  max = max(vax_map$Year),
                   value = 2005,
                   step = 1),
-      sliderInput("traj_range", "Trajectory year range:",
-                  min = min(vax_long$Year),
-                  max = max(vax_long$Year),
-                  value = c(1980, 2024),
+      sliderInput("traj_year", "Trajectory year:",
+                  min = min(vax_map$Year),
+                  max = max(vax_map$Year),
+                  value = 2005,
                   step = 1),
       materialSwitch("show_world_avg", "Show world averages", value = FALSE)
     ),
@@ -68,31 +47,10 @@ ui <- fluidPage(
   )
 )
 
-# SERVER
+
+
+
 server <- function(input, output, session) {
-
-  # Filter for selected vaccine + year
-  filtered_year <- reactive({
-    vax_long |>
-      filter(vaccine == input$vax,
-             Year == input$year)
-  })
-
-  # Map
-  output$map <- renderLeaflet({
-    df <- filtered_year()
-
-    leaflet(df) |>
-      addProviderTiles("CartoDB.Positron") |>
-      addCircleMarkers(
-        lng = df$longitude,
-        lat = df$latitude,
-        layerId = df$Entity,
-        radius = 6,
-        color = ~colorNumeric("Blues", coverage)(coverage),
-        label = ~paste0(Entity, ": ", coverage, "%")
-      )
-  })
 
   # Track selected country
   selected_country <- reactiveVal(NULL)
@@ -101,7 +59,47 @@ server <- function(input, output, session) {
     selected_country(input$map_marker_click$id)
   })
 
-  # Blank state
+  # Filter for selected vaccine + year
+  filtered_year <- reactive({
+    vax_map |>
+      filter(vaccine == input$vax,
+             Year == input$year)
+  })
+
+  # Initialize map once
+  output$map <- renderLeaflet({
+    leaflet() |>
+      addProviderTiles("CartoDB.Positron")
+  })
+
+  # Update map markers + legend
+  observe({
+    df <- filtered_year() |>
+      filter(!is.na(coverage))
+
+    pal <- colorNumeric("Blues", df$coverage)
+
+    leafletProxy("map", data = df) |>
+      clearMarkers() |>
+      clearControls() |>
+      addCircleMarkers(
+        lng = ~longitude,
+        lat = ~latitude,
+        layerId = ~Entity,
+        radius = 6,
+        color = ~pal(coverage),
+        label = ~paste0(Entity, ": ", coverage, "%")
+      ) |>
+      addLegend(
+        position = "bottomright",
+        pal = pal,
+        values = df$coverage,
+        title = "Coverage (%)",
+        opacity = 1
+      )
+  })
+
+  # Country header
   output$country_header <- renderUI({
     req(selected_country())
     tagList(
@@ -114,43 +112,48 @@ server <- function(input, output, session) {
   output$country_traj <- renderPlotly({
     req(selected_country())
 
-    df <- vax_long |>
+    # Full trajectory for the selected country
+    df <- vax_map |>
       filter(Entity == selected_country(),
-             vaccine == input$vax,
-             Year >= input$traj_range[1],
-             Year <= input$traj_range[2])
+             vaccine == input$vax)
 
-    world_avg <- vax_long |>
+    # World average for the selected single year
+    world_avg <- vax_map |>
       filter(vaccine == input$vax,
-             Year >= input$traj_range[1],
-             Year <= input$traj_range[2]) |>
-      group_by(Year) |>
+             Year == input$traj_year) |>
       summarize(world_avg = mean(coverage, na.rm = TRUE))
 
-    p <- plot_ly(df, x = ~Year, y = ~coverage, type = "scatter", mode = "lines+markers",
+    p <- plot_ly(df, x = ~Year, y = ~coverage,
+                 type = "scatter", mode = "lines+markers",
                  name = selected_country())
 
     if (input$show_world_avg) {
       p <- p |>
-        add_lines(data = world_avg, x = ~Year, y = ~world_avg,
-                  name = "World average", line = list(dash = "dash"))
+        add_lines(
+          x = df$Year,
+          y = rep(world_avg$world_avg, nrow(df)),
+          name = paste("World avg", input$traj_year),
+          line = list(dash = "dash")
+        )
     }
 
     p |>
       layout(yaxis = list(title = "Coverage (%)"))
   })
 
-  # GDP scatter (if GDP exists)
+  # GDP scatter
   output$gdp_scatter <- renderPlotly({
     df <- filtered_year()
 
-    if (!"gdp_per_capita" %in% names(df)) {
-      return(NULL)
-    }
+    gdp_col <- intersect(c("GDP", "gdp", "gdp_per_capita"), names(df))
+    if (length(gdp_col) == 0) return(NULL)
 
-    plot_ly(df, x = ~gdp_per_capita, y = ~coverage,
-            type = "scatter", mode = "markers",
-            text = ~Entity) |>
+    plot_ly(df,
+            x = df[[gdp_col]],
+            y = df$coverage,
+            type = "scatter",
+            mode = "markers",
+            text = df$Entity) |>
       layout(
         xaxis = list(title = "GDP per capita"),
         yaxis = list(title = paste(input$vax, "coverage (%)"))
