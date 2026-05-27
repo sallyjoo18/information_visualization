@@ -1,0 +1,422 @@
+---
+title: "A Quiet Revolution, an Uneven Map, and a Pandemic"
+subtitle: "Four decades of childhood vaccination, told in four beats (Daniel's version)"
+author: "Team 15"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    fig-width: 10
+    fig-height: 6
+    theme: cosmo
+    page-layout: article
+    code-tools: false
+    embed-resources: true
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(viridis)
+library(maps)
+library(countrycode)
+library(ggrepel)
+library(ggtext)
+
+vaccine <- read.csv(
+  "global-vaccination-coverage.csv",
+  check.names = FALSE,
+  na.strings  = c("", "NA")
+)
+gdp <- read.csv(
+  "gdp-per-capita-worldbank.csv",
+  check.names = FALSE,
+  na.strings  = c("", "NA")
+) |>
+  rename(gdp = `GDP per capita`, region = `World region according to OWID`)
+
+is_country <- function(x) !is.na(x) & nchar(x) == 3 & !grepl("_", x, fixed = TRUE)
+
+countries <- vaccine |> filter(is_country(Code))
+world     <- vaccine |> filter(Code == "OWID_WRL")
+
+theme_story <- function() {
+  theme_minimal(base_size = 12) +
+    theme(
+      plot.title    = element_text(face = "bold", size = 15),
+      plot.subtitle = element_text(color = "grey35", size = 11,
+                                   margin = margin(b = 10)),
+      plot.caption  = element_text(color = "grey55", size = 9, hjust = 0),
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_line(color = "grey92"),
+      axis.title    = element_text(color = "grey25"),
+      axis.text     = element_text(color = "grey35"),
+      legend.position = "bottom",
+      plot.margin   = margin(10, 14, 10, 10)
+    )
+}
+```
+
+::: {.callout-note appearance="simple"}
+**Communication goals.** This prototype walks the reader through four
+beats: (1) the dramatic global rise in childhood vaccination since 1980,
+(2) the inequalities that persist beneath the global average, (3) the
+structural — especially economic — drivers of those inequalities, and
+(4) how the COVID-19 pandemic disrupted decades of progress. Each beat
+is one chart, one paragraph of narration, and one or two annotations
+that point directly to the evidence on the chart.
+:::
+
+## A quiet revolution, 1980–2024 { #beat-1 }
+
+In 1980, fewer than one in five children worldwide was vaccinated against
+diphtheria, tetanus, and pertussis. Today, the figure is more than four
+in five. That shift — from **20%** to **85%** in just over four decades —
+ranks among the largest public-health gains in modern history, yet it
+rarely shows up in headlines. We open the story there: with the long arc
+that all of the later complications hang from.
+
+```{r}
+#| label: beat1-rise
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-cap: "Source: WHO / UNICEF Estimates of National Immunization Coverage, via Our World in Data."
+
+world_long <- world |>
+  select(Year,
+         DTP3 = `Diptheria/tetanus/pertussis (DTP3)`,
+         MCV1 = `Measles, first dose (MCV1)`,
+         Pol3 = `Polio (Pol3)`,
+         HepB3 = `Hepatitis B (HepB3)`) |>
+  pivot_longer(-Year, names_to = "vaccine", values_to = "coverage") |>
+  filter(!is.na(coverage))
+
+end_pts <- world_long |> group_by(vaccine) |> filter(Year == max(Year)) |>
+  ungroup()
+
+ggplot(world_long, aes(Year, coverage, color = vaccine)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = 90, ymax = 100,
+           fill = "grey85", alpha = 0.35) +
+  annotate("text", x = 1981, y = 92.5, label = "WHO 90% target",
+           hjust = 0, color = "grey45", size = 3.3, fontface = "italic") +
+  geom_line(linewidth = 1.1, na.rm = TRUE) +
+  geom_point(data = end_pts, size = 2.6) +
+  ggrepel::geom_text_repel(
+    data = end_pts,
+    aes(label = paste0(vaccine, ": ", coverage, "%")),
+    hjust = 0, nudge_x = 1.5, direction = "y",
+    size = 3.6, fontface = "bold",
+    segment.color = "grey70", segment.size = 0.3,
+    box.padding = 0.25, min.segment.length = 0,
+    show.legend = FALSE, seed = 1
+  ) +
+  annotate("segment", x = 1980, xend = 1980, y = 22, yend = 30,
+           color = "grey30", linewidth = 0.4) +
+  annotate("text", x = 1980, y = 18,
+           label = "DTP3 at 20%\nin 1980",
+           hjust = 0.05, color = "grey25", size = 3.2, lineheight = 0.9) +
+  scale_x_continuous(limits = c(1980, 2030), breaks = seq(1980, 2024, 10)) +
+  scale_y_continuous(limits = c(0, 100),
+                     labels = function(x) paste0(x, "%")) +
+  scale_color_manual(values = c(DTP3 = "#1F4E79", MCV1 = "#C0504D",
+                                Pol3 = "#4F81BD", HepB3 = "#9BBB59"),
+                     name = NULL) +
+  labs(
+    title    = "Global childhood vaccination coverage, 1980–2024",
+    subtitle = "Share of one-year-olds receiving each vaccine. World-level average.",
+    x = NULL, y = NULL,
+    caption  = "Shaded band marks the WHO target of 90% coverage."
+  ) +
+  theme_story() +
+  theme(legend.position = "none")
+```
+
+Four of the workhorse vaccines tell the same story. Diphtheria-tetanus-pertussis
+and polio both crossed the 75% line by 1990 — within a decade of the WHO's
+Expanded Programme on Immunization gaining momentum. Hepatitis B took longer
+because it was added to the routine schedule later, but it has effectively
+caught up. The global picture, in short, looks like a success.
+
+## But "global average" hides a lot { #beat-2 }
+
+A single global line is reassuring, and misleading. Average coverage in 2024
+sits at 85%, but the spread *between* countries is still enormous: nearly
+**60 percentage points** separate the best- and worst-performing nations.
+The map below shows where those gaps live. Two African neighbours,
+**Rwanda (98%)** and **Sudan (39%)**, sit at opposite ends of the scale in
+the same year.
+
+```{r}
+#| label: beat2-map
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-height: 5.6
+#| fig-cap: "DTP3 coverage among one-year-olds in 2024. Grey = no data reported."
+
+dtp_2024 <- countries |>
+  filter(Year == 2024) |>
+  transmute(iso3 = Code, Entity, dtp3 = `Diptheria/tetanus/pertussis (DTP3)`)
+
+world_map <- map_data("world")
+world_map$iso3 <- suppressWarnings(countrycode(
+  world_map$region,
+  origin      = "country.name",
+  destination = "iso3c",
+  warn        = FALSE
+))
+map_df <- left_join(world_map, dtp_2024 |> select(iso3, dtp3), by = "iso3")
+
+labels <- tribble(
+  ~Entity,     ~iso3,  ~lab_x, ~lab_y, ~end_x, ~end_y, ~note,
+  "Rwanda",    "RWA",     55,    -18,    30,    -2,   "Rwanda: 98%",
+  "Sudan",     "SDN",    -25,     28,    30,    15,   "Sudan: 39%",
+  "Azerbaijan","AZE",     85,     55,    48,    40,   "Azerbaijan: 51%\n(GDP > $22K)"
+)
+
+ggplot(map_df, aes(long, lat, group = group, fill = dtp3)) +
+  geom_polygon(color = "white", linewidth = 0.05) +
+  geom_segment(data = labels, inherit.aes = FALSE,
+               aes(x = lab_x, y = lab_y, xend = end_x, yend = end_y),
+               color = "grey25", linewidth = 0.35) +
+  geom_label(data = labels, inherit.aes = FALSE,
+             aes(x = lab_x, y = lab_y, label = note),
+             size = 3.1, color = "grey15", fill = "white",
+             label.size = 0.25, label.padding = unit(0.2, "lines"),
+             hjust = 0.5, lineheight = 0.9) +
+  coord_fixed(1.3, xlim = c(-170, 180), ylim = c(-58, 85)) +
+  scale_fill_viridis_c(
+    option   = "viridis",
+    name     = "DTP3 coverage",
+    limits   = c(0, 100),
+    na.value = "grey88",
+    breaks   = c(0, 25, 50, 75, 100),
+    labels   = function(x) paste0(x, "%")
+  ) +
+  labs(
+    title    = "Vaccination coverage is *uneven* across the world",
+    subtitle = "Diphtheria-tetanus-pertussis (DTP3), 2024"
+  ) +
+  theme_void(base_size = 12) +
+  theme(
+    plot.title       = ggtext::element_markdown(face = "bold", size = 15),
+    plot.subtitle    = element_text(color = "grey35", size = 11,
+                                    margin = margin(b = 8)),
+    legend.position  = "bottom",
+    legend.key.width = unit(2.4, "cm"),
+    legend.key.height= unit(0.35, "cm")
+  )
+```
+
+The low-coverage band runs through the Sahel, the Horn of Africa, and a
+handful of conflict-affected states; the high-coverage band covers nearly all
+of Europe, the Americas, and East Asia. But coverage is not destiny: Rwanda's
+98% rate, achieved at a GDP per capita under $3,500, sits next to wealthy
+**Azerbaijan's 51%** — a result that should be impossible if vaccination
+were simply a question of money.
+
+## Money matters — but it isn't the whole story { #beat-3 }
+
+If wealth alone determined vaccination, every country would line up neatly
+along a single curve. They don't. Coverage *does* climb with GDP per capita,
+but the cloud of dots is wide enough that nearly every income level contains
+both stars and laggards. The trend is real but loose: a Pearson correlation
+of roughly **r ≈ 0.5** between log-GDP and DTP3 coverage in 2024.
+
+```{r}
+#| label: beat3-gdp
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-cap: "GDP per capita on a log scale. Dashed line is a loess fit with 95% CI."
+
+cy <- countries |>
+  filter(Year == 2024) |>
+  transmute(Code, Entity, dtp3 = `Diptheria/tetanus/pertussis (DTP3)`)
+
+gy <- gdp |>
+  filter(Year == 2024, is_country(Code)) |>
+  select(Code, gdp, region)
+
+df <- inner_join(cy, gy, by = "Code") |>
+  filter(!is.na(dtp3), !is.na(gdp), !is.na(region))
+
+r_val <- cor(log10(df$gdp), df$dtp3)
+
+highlights <- df |> filter(Entity %in% c(
+  "Rwanda", "Sudan", "Azerbaijan", "United States",
+  "Bangladesh", "Equatorial Guinea"
+))
+
+ggplot(df, aes(gdp, dtp3)) +
+  geom_smooth(method = "loess", color = "#2C3E50",
+              fill = "#2C3E50", alpha = 0.10, linewidth = 0.9,
+              linetype = "dashed", se = TRUE, na.rm = TRUE) +
+  geom_point(aes(fill = region), shape = 21, color = "white",
+             stroke = 0.45, size = 3.4, alpha = 0.9) +
+  geom_point(data = highlights, shape = 21, fill = NA,
+             color = "black", size = 5, stroke = 1.1) +
+  ggrepel::geom_text_repel(
+    data = highlights,
+    aes(label = Entity),
+    size = 3.5, fontface = "bold", color = "grey10",
+    box.padding = 0.4, seed = 1
+  ) +
+  annotate("text", x = 1500, y = 96,
+           label = "Punching above its weight\n(Rwanda, Bangladesh)",
+           hjust = 0, vjust = 1, size = 3.3, color = "#1B5E20",
+           fontface = "italic", lineheight = 0.9) +
+  annotate("text", x = 28000, y = 55,
+           label = "Wealth without coverage\n(Azerbaijan, Eq. Guinea)",
+           hjust = 0.5, size = 3.3, color = "#B71C1C",
+           fontface = "italic", lineheight = 0.9) +
+  scale_x_log10(
+    labels = scales::label_dollar(scale_cut = scales::cut_short_scale()),
+    breaks = c(1000, 2000, 5000, 10000, 20000, 50000, 100000)
+  ) +
+  scale_y_continuous(limits = c(30, 102),
+                     labels = function(x) paste0(x, "%")) +
+  scale_fill_manual(values = c(
+    "Africa"        = "#D1495B",
+    "Asia"          = "#3E78B2",
+    "Europe"        = "#5C9E6E",
+    "North America" = "#E08A3C",
+    "Oceania"       = "#8E6CA1",
+    "South America" = "#4FA8A1"
+  ), name = NULL) +
+  labs(
+    title    = "Coverage rises with wealth — but with a wide cloud",
+    subtitle = sprintf(
+      "DTP3 coverage vs. GDP per capita, 2024. r = %.2f (log GDP, n = %d).",
+      r_val, nrow(df)),
+    x = "GDP per capita (log scale, US$)",
+    y = NULL
+  ) +
+  theme_story()
+```
+
+The labelled countries are the story. **Rwanda** and **Bangladesh** sit far
+above the trend line: poor by world-bank measures, but with delivery systems
+strong enough to reach essentially every infant. On the other side,
+**Azerbaijan** and **Equatorial Guinea** are oil-rich and yet vaccinate at
+rates more typical of much poorer countries. Money helps, but what really
+seems to matter is whether a country has a functioning primary-care network
+to *use* the money for routine immunization.
+
+## A first decline since 1980 { #beat-4 }
+
+Progress is never guaranteed. Between 2019 and 2021, global DTP3 coverage
+fell from **86% to 82%** — the first sustained dip in four decades, driven
+by COVID-19 lockdowns and the diversion of healthcare workers to pandemic
+response. By 2024 the world had clawed most of it back, but still sits one
+percentage point below pre-pandemic peak.
+
+```{r}
+#| label: beat4-covid
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-height: 5
+#| fig-cap: "Four core vaccines, global average. WHO/UNICEF estimates."
+
+recent <- world |>
+  select(Year,
+         DTP3 = `Diptheria/tetanus/pertussis (DTP3)`,
+         MCV1 = `Measles, first dose (MCV1)`,
+         Pol3 = `Polio (Pol3)`,
+         HepB3 = `Hepatitis B (HepB3)`) |>
+  filter(Year >= 2010) |>
+  pivot_longer(-Year, names_to = "vaccine", values_to = "coverage")
+
+ggplot(recent, aes(Year, coverage, color = vaccine)) +
+  annotate("rect", xmin = 2020, xmax = 2021.5,
+           ymin = -Inf, ymax = Inf,
+           fill = "#C0504D", alpha = 0.12) +
+  annotate("text", x = 2020.75, y = 95,
+           label = "COVID-19\ndisruption",
+           color = "#7A1F1B", size = 3.4, fontface = "bold",
+           lineheight = 0.9) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2.2) +
+  ggrepel::geom_text_repel(
+    data = recent |> filter(Year == 2024),
+    aes(label = paste0(vaccine, " ", coverage, "%")),
+    nudge_x = 0.8, direction = "y", hjust = 0,
+    size = 3.4, fontface = "bold",
+    segment.color = "grey70", segment.size = 0.3,
+    box.padding = 0.2, min.segment.length = 0,
+    show.legend = FALSE, seed = 1
+  ) +
+  scale_x_continuous(limits = c(2010, 2025.5),
+                     breaks = seq(2010, 2024, 2)) +
+  scale_y_continuous(limits = c(78, 96),
+                     labels = function(x) paste0(x, "%")) +
+  scale_color_manual(values = c(DTP3 = "#1F4E79", MCV1 = "#C0504D",
+                                Pol3 = "#4F81BD", HepB3 = "#9BBB59"),
+                     name = NULL) +
+  labs(
+    title    = "COVID-19 broke a 40-year streak — and recovery is incomplete",
+    subtitle = "Global coverage of four core vaccines, 2010–2024",
+    x = NULL, y = NULL
+  ) +
+  theme_story()
+```
+
+The dip is small in absolute terms but enormous in context: from 1980 through
+2019, the line had only ever drifted sideways, never sustained a multi-year
+fall. **Measles coverage** has been slowest to recover — and unlike DTP3,
+measles needs roughly 95% coverage to prevent outbreaks, so the gap matters.
+The dashboard at the end of this report lets you check whether *your* country
+has fully recovered.
+
+## What this means — and what to do next
+
+Put together, the four charts tell a single story:
+
+- **Global progress is real.** Childhood vaccination coverage has roughly
+  quadrupled in a generation.
+- **But the global average hides a 60-point gap** between the best and worst
+  performers, and that gap has geographic shape: it concentrates in the
+  Sahel and a handful of conflict states.
+- **Wealth predicts coverage on average, but not country-by-country.** The
+  countries that punch above their weight tend to share a feature wealth
+  alone doesn't buy: a working primary-care system.
+- **And the system is fragile.** A single global shock cost four years of
+  progress, and the recovery isn't yet complete.
+
+Each beat is built directly from the WHO/UNICEF Estimates of National
+Immunization Coverage (1980–2024) and World Bank GDP per capita data.
+
+### Now you explore
+
+The static narrative above takes the same dataset and turns it into four
+guided moments. The companion dashboard inverts that: it hands the wheel
+to the reader. Pick any vaccine, drag through any year, click any country
+to see its full trajectory and compare it to the world average.
+
+> **→ Run the dashboard:** `Rscript -e 'shiny::runApp("dashboard")'` from
+> the `information_visualization/` folder, or open `dashboard/app.R` in
+> RStudio and click **Run App**.
+
+::: {.callout-tip collapse="true"}
+## Methods and caveats
+
+- **Population denominator.** Coverage figures describe the share of
+  one-year-olds who received each vaccine in that calendar year — not the
+  share of the whole population.
+- **Missing values are kept as gaps**, not zeros. For newer vaccines
+  (PCV3, Rotavirus, IPV1) a blank cell typically means the vaccine wasn't
+  yet on the routine schedule.
+- **Recent years are partly estimated.** WHO extrapolates from prior
+  reporting when countries don't report on time, so 2023–2024 numbers
+  should be treated as best-available rather than firm.
+- **GDP data starts in 1990.** Any cross-data analyses pre-1990 use only
+  the vaccine series.
+:::

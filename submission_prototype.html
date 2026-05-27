@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Childhood Vaccination Coverage · Team 15</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --plot: #111111;
+    --border: #333333;
+    --text: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --text-body: #d4d4d4;
+    --text-dim: #737373;
+    --accent: #3b82f6;
+    --accent2: #22c55e;
+    --accent3: #f97316;
+    --accent4: #a855f7;
+    --accent5: #eab308;
+    --accent6: #06b6d4;
+    --who-line: #ef4444;
+    --map-nodata: #262626;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    line-height: 1.65;
+    font-size: 16px;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,10,0.94); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 52px;
+  }
+  .nav-brand {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 500; flex-shrink: 0;
+  }
+  .nav-links { display: flex; gap: 0; }
+  .nav-links a {
+    font-size: 0.82rem; color: var(--text-muted); text-decoration: none;
+    padding: 0.4rem 0.9rem; border-radius: 6px; transition: all 0.15s; font-weight: 400;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--surface); }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
+
+  /* SECTIONS */
+  section { padding: 5rem 0; border-bottom: 1px solid var(--border); }
+  .section-inner { max-width: 1140px; margin: 0 auto; padding: 0 2rem; }
+  .section-header { margin-bottom: 3rem; }
+  .level-tag {
+    display: inline-block; font-size: 0.7rem; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 600; padding: 0.3rem 0.8rem;
+    border-radius: 4px; margin-bottom: 1rem;
+  }
+  .level-1 .level-tag { background: #1f1f1f; color: var(--accent); }
+  .level-2 .level-tag { background: #1f1f1f; color: var(--accent2); }
+  .level-3 .level-tag { background: #1f1f1f; color: var(--accent4); }
+  .level-4 .level-tag { background: #1f1f1f; color: var(--accent3); }
+
+  /* STORY INTRO */
+  .story-intro {
+    padding: 3.5rem 0 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .story-tag {
+    font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .story-intro h1 {
+    font-size: clamp(1.85rem, 3.5vw, 2.75rem);
+    font-weight: 700; line-height: 1.15; margin-bottom: 1rem; color: var(--text);
+  }
+  .story-lede {
+    color: var(--text-body); font-size: 1.0625rem; line-height: 1.75;
+    max-width: 760px; margin-bottom: 2.5rem;
+  }
+  .story-goals-heading {
+    font-size: 1.35rem; font-weight: 700; color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+  .story-goals {
+    display: grid; gap: 0.85rem; max-width: 820px;
+    list-style: none; counter-reset: goal;
+  }
+  .story-goals li {
+    counter-increment: goal;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.85rem 1rem 0.85rem 2.75rem;
+    color: var(--text-body); font-size: 0.9375rem; line-height: 1.6;
+    position: relative;
+  }
+  .story-goals li::before {
+    content: counter(goal);
+    position: absolute; left: 1rem; top: 0.85rem;
+    font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+  }
+  .story-goals strong { color: var(--text); font-weight: 600; }
+
+  .section-header h2 {
+    font-family: inherit;
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.2; margin-bottom: 0.75rem;
+    color: var(--text);
+  }
+  .section-header p {
+    color: var(--text-body);
+    max-width: 720px;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  /* CARDS */
+  .chart-card {
+    width: 100%;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .chart-title {
+    font-size: 0.8125rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600;
+  }
+  .chart-subtitle {
+    font-size: 1rem;
+    color: var(--text-body);
+    margin-bottom: 1.2rem;
+    line-height: 1.6;
+  }
+  .chart-wrap {
+    width: 100%;
+    position: relative;
+  }
+  .chart-wrap > [id^="chart"] {
+    width: 100%;
+    min-width: 0;
+  }
+  .chart-wrap svg {
+    display: block;
+    width: 100% !important;
+    height: auto;
+  }
+  #chart1-wrap { min-height: 500px; }
+  #chart2-wrap { min-height: 520px; }
+  #chart3-wrap { min-height: 640px; }
+  #chart4a-wrap, #chart4b-wrap { min-height: 420px; }
+  svg text { font-family: inherit; }
+
+  /* LEGEND */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem;
+    margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-body);
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch { width: 20px; height: 3px; border-radius: 2px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .chart-stats {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-align: right;
+    margin: -0.25rem 0 0.75rem;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex; align-items: center; gap: 0.8rem;
+    margin-bottom: 1.2rem; flex-wrap: wrap;
+  }
+  .control-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+  .select {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 0.35rem 0.7rem; border-radius: 6px; font-size: 0.82rem;
+    font-family: inherit; cursor: pointer;
+  }
+  .select:focus { outline: none; border-color: var(--accent); }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: fixed; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.9rem; font-size: 0.8rem; pointer-events: none;
+    opacity: 0; transition: opacity 0.1s; z-index: 200;
+    max-width: 240px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .tooltip strong { display: block; color: var(--text); margin-bottom: 0.2rem; }
+  .tooltip span { color: var(--text-muted); }
+
+  /* GRID */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 820px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* INSIGHTS */
+  .insight {
+    background: var(--surface2); border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0; padding: 1.1rem 1.35rem; margin-top: 1.2rem;
+    font-size: 1rem; color: var(--text-body); line-height: 1.75;
+  }
+  .insight strong { color: var(--text); font-weight: 600; }
+  .level-2 .insight { border-left-color: var(--accent2); }
+  .level-3 .insight { border-left-color: var(--accent4); }
+  .level-4 .insight { border-left-color: var(--accent3); }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 2rem; text-align: center; color: var(--text-muted);
+    font-size: 0.8rem; line-height: 1.8;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* AXIS / GRID */
+  .axis path, .axis line { stroke: var(--border); }
+  .axis text { fill: var(--text-body); font-size: 13px; }
+  .grid line { stroke: var(--border); stroke-opacity: 0.5; }
+  .grid path { stroke: none; }
+
+  /* MAP */
+  .country { stroke: var(--bg); stroke-width: 0.4; transition: fill 0.15s, stroke 0.1s; cursor: default; }
+  .country:hover { stroke: var(--text); stroke-width: 1.2; }
+  .map-legend text { fill: var(--text-body); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">Vaccination Coverage</div>
+  <div class="nav-links">
+    <a href="#level1" id="nav1">Global Rise</a>
+    <a href="#level2" id="nav2">Where Coverage Lives</a>
+    <a href="#level3" id="nav3">Wealth &amp; Coverage</a>
+    <a href="#level4" id="nav4">COVID Disruption</a>
+  </div>
+  <div class="nav-dot" id="navDot" style="background: var(--accent);"></div>
+</nav>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- STORY INTRO -->
+<section class="story-intro" id="intro">
+  <div class="section-inner">
+    <h1>From Global Progress to Uneven Recovery</h1>
+    <p class="story-lede">Over four decades, childhood vaccination grew from a patchwork of national programs into one of the most successful public-health efforts in history — reaching most of the world, but not all of it equally. COVID-19 then showed how fragile even decades of progress can be. The sections below walk through that story using our WHO/UNICEF coverage data (1980–2024), pairing explanatory text with interactive charts.</p>
+    <h2 class="story-goals-heading">Communication Goals</h2>
+    <ol class="story-goals">
+      <li><strong>Trace the global rise:</strong> Show how routine childhood vaccination coverage climbed from near zero to near universal, benchmarked against the WHO 90% target.</li>
+      <li><strong>Highlight geographic inequality:</strong> Reveal how the world average hides dramatic gaps between countries and regions.</li>
+      <li><strong>Explore structural drivers:</strong> Investigate whether wealth and development explain who vaccinates well — and who falls behind despite resources.</li>
+      <li><strong>Examine COVID disruption:</strong> Measure how the pandemic reversed progress and which vaccines recovered fastest afterward.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- LEVEL 1: GLOBAL RISE -->
+<section id="level1" class="level-1">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="level-tag">Level 1 · Global Overview</div>
+      <h2>A Remarkable Rise in<br>Global Coverage</h2>
+      <p>From 1980 to 2024, routine childhood vaccination transformed from a privilege of wealthy nations into a near-universal standard. Every vaccine in the global schedule is shown; hover the chart to read off any year.</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Global Vaccination Coverage, 1980–2024</div>
+      <div class="chart-subtitle">Share of one-year-olds vaccinated, world average. Dashed red line = WHO 90% target.</div>
+      <div class="legend" id="legend1"></div>
+      <div class="chart-wrap" id="chart1-wrap"><div id="chart1"></div></div>
+    </div>
+
+    <div class="insight">
+      <strong>Key finding:</strong> DTP3 and Polio coverage rose from ~20% in 1980 to over 85% by 2019 — then dipped sharply during COVID. Newer vaccines (PCV, Rotavirus, IPV) climb from near zero only after their introduction into the routine schedule.
+    </div>
+  </div>
+</section>
+
+<!-- LEVEL 2: MAP -->
+<section id="level2" class="level-2">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="level-tag">Level 2 · Geographic Inequality</div>
+      <h2>The Global Average<br>Hides a 60-Point Gap</h2>
+      <p>The same 2024 average that suggests near-universal coverage masks dramatic inequality between countries. Pick a vaccine and hover any country to read its coverage.</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Coverage by Country, 2024</div>
+      <div class="chart-subtitle">Grey countries had no reported value for the selected vaccine in 2024.</div>
+      <div class="controls">
+        <label class="control-label" for="mapVaccine">Vaccine:</label>
+        <select class="select" id="mapVaccine"></select>
+      </div>
+      <div class="chart-wrap" id="chart2-wrap"><div id="chart2"></div></div>
+    </div>
+
+    <div class="insight">
+      <strong>Key finding:</strong> Rwanda reaches 98% DTP3 coverage with a GDP per capita under $3,500, while wealthier Azerbaijan sits at 51%. Coverage tracks public-health capacity more than national income — a point we return to in Level 3.
+    </div>
+  </div>
+</section>
+
+<!-- LEVEL 3: GDP SCATTER -->
+<section id="level3" class="level-3">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="level-tag">Level 3 · Wealth &amp; Coverage</div>
+      <h2>Money Matters —<br>But Not the Whole Story</h2>
+      <p>Coverage rises with GDP per capita, but the cloud is wide enough that nearly every income level contains both stars and laggards. The trend is real but loose.</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">DTP3 Coverage vs. GDP per capita, 2024</div>
+      <div class="chart-subtitle">GDP on log scale. Each dot is one country, coloured by world region.</div>
+      <div class="legend" id="legend3"></div>
+      <div class="chart-stats" id="scatter-stats"></div>
+      <div class="chart-wrap" id="chart3-wrap"><div id="chart3"></div></div>
+    </div>
+
+    <div class="insight">
+      <strong>Key finding:</strong> Wealth and vaccination coverage move together — but only loosely. Richer countries tend to vaccinate more, yet Rwanda and Bangladesh outperform nations many times their income, while Azerbaijan lags far behind despite its resources. What matters most is a working primary-care system, not money alone.
+    </div>
+  </div>
+</section>
+
+<!-- LEVEL 4: COVID -->
+<section id="level4" class="level-4">
+  <div class="section-inner">
+    <div class="section-header">
+      <div class="level-tag">Level 4 · COVID Disruption</div>
+      <h2>The Pandemic Set Back<br>Decades of Progress</h2>
+      <p>Between 2019 and 2021, global DTP3 coverage fell from 86% to 82% — the first sustained decline since 1980. Some countries lost far more.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-title">Biggest Drops in DTP3 Coverage (percentage points)</div>
+        <div class="chart-subtitle">Pre-pandemic avg (2015–19) vs. pandemic avg (2020–23)</div>
+        <div class="chart-wrap" id="chart4a-wrap"><div id="chart4a"></div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Global Trend: Four Core Vaccines, 2010–2024</div>
+        <div class="chart-subtitle">World average, 2010–2024. Y-axis scales to fit all four vaccines — note HepB’s late rise from ~72% in 2010. Red shaded band marks the 2020–2021 disruption.</div>
+        <div class="legend" id="legend4b"></div>
+        <div class="chart-wrap" id="chart4b-wrap"><div id="chart4b"></div></div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <strong>Key finding:</strong> Azerbaijan, Myanmar, and Mozambique each lost over 20 percentage points of DTP3 coverage during the pandemic. Globally, the system has nearly recovered (85% in 2024 vs. 86% in 2019) — but a single shock erased four years of progress, and measles, which needs ~95% coverage to prevent outbreaks, has been slowest to come back.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong style="color: var(--text);">Data</strong><br>
+  Vaccination coverage: WHO/UNICEF Joint Immunization Estimates, 1980–2024 · <a href="https://ourworldindata.org" target="_blank">Our World in Data</a><br>
+  GDP per capita: World Bank · accessed via <a href="https://ourworldindata.org" target="_blank">Our World in Data</a><br>
+  Note: 2023–2024 figures include WHO extrapolations for late-reporting countries.<br><br>
+  <span>Team 15</span>
+</footer>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const worldData = [{"year":1980,"DTP3":20.0,"Polio":21.0,"Measles":16.0,"Rubella":3.0,"Hep B":null,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1981,"DTP3":23.0,"Polio":22.0,"Measles":19.0,"Rubella":4.0,"Hep B":null,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1982,"DTP3":25.0,"Polio":41.0,"Measles":20.0,"Rubella":4.0,"Hep B":null,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1983,"DTP3":37.0,"Polio":42.0,"Measles":36.0,"Rubella":4.0,"Hep B":null,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1984,"DTP3":44.0,"Polio":46.0,"Measles":40.0,"Rubella":5.0,"Hep B":null,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1985,"DTP3":48.0,"Polio":50.0,"Measles":46.0,"Rubella":5.0,"Hep B":0.0,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1986,"DTP3":51.0,"Polio":50.0,"Measles":46.0,"Rubella":5.0,"Hep B":0.0,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1987,"DTP3":55.0,"Polio":56.0,"Measles":53.0,"Rubella":5.0,"Hep B":0.0,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1988,"DTP3":63.0,"Polio":64.0,"Measles":62.0,"Rubella":6.0,"Hep B":0.0,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1989,"DTP3":68.0,"Polio":70.0,"Measles":67.0,"Rubella":7.0,"Hep B":0.0,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1990,"DTP3":76.0,"Polio":75.0,"Measles":73.0,"Rubella":7.0,"Hep B":1.0,"Hib":0.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1991,"DTP3":71.0,"Polio":71.0,"Measles":68.0,"Rubella":8.0,"Hep B":1.0,"Hib":0.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1992,"DTP3":69.0,"Polio":69.0,"Measles":68.0,"Rubella":8.0,"Hep B":3.0,"Hib":1.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1993,"DTP3":69.0,"Polio":70.0,"Measles":69.0,"Rubella":9.0,"Hep B":4.0,"Hib":1.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1994,"DTP3":72.0,"Polio":72.0,"Measles":71.0,"Rubella":10.0,"Hep B":7.0,"Hib":1.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1995,"DTP3":72.0,"Polio":73.0,"Measles":73.0,"Rubella":11.0,"Hep B":11.0,"Hib":4.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1996,"DTP3":72.0,"Polio":73.0,"Measles":73.0,"Rubella":12.0,"Hep B":13.0,"Hib":5.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1997,"DTP3":71.0,"Polio":73.0,"Measles":71.0,"Rubella":12.0,"Hep B":14.0,"Hib":5.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1998,"DTP3":71.0,"Polio":72.0,"Measles":70.0,"Rubella":15.0,"Hep B":15.0,"Hib":7.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":1999,"DTP3":71.0,"Polio":72.0,"Measles":71.0,"Rubella":16.0,"Hep B":18.0,"Hib":8.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2000,"DTP3":72.0,"Polio":72.0,"Measles":71.0,"Rubella":20.0,"Hep B":29.0,"Hib":13.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2001,"DTP3":72.0,"Polio":73.0,"Measles":72.0,"Rubella":21.0,"Hep B":31.0,"Hib":14.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2002,"DTP3":72.0,"Polio":74.0,"Measles":72.0,"Rubella":21.0,"Hep B":37.0,"Hib":16.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2003,"DTP3":74.0,"Polio":75.0,"Measles":73.0,"Rubella":22.0,"Hep B":44.0,"Hib":17.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2004,"DTP3":76.0,"Polio":76.0,"Measles":75.0,"Rubella":23.0,"Hep B":48.0,"Hib":19.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2005,"DTP3":77.0,"Polio":78.0,"Measles":77.0,"Rubella":23.0,"Hep B":54.0,"Hib":20.0,"PCV":null,"Rotavirus":null,"IPV":null},{"year":2006,"DTP3":78.0,"Polio":79.0,"Measles":79.0,"Rubella":25.0,"Hep B":58.0,"Hib":21.0,"PCV":null,"Rotavirus":1.0,"IPV":null},{"year":2007,"DTP3":78.0,"Polio":80.0,"Measles":79.0,"Rubella":25.0,"Hep B":63.0,"Hib":24.0,"PCV":null,"Rotavirus":2.0,"IPV":null},{"year":2008,"DTP3":81.0,"Polio":82.0,"Measles":81.0,"Rubella":25.0,"Hep B":69.0,"Hib":27.0,"PCV":4.0,"Rotavirus":4.0,"IPV":null},{"year":2009,"DTP3":83.0,"Polio":83.0,"Measles":83.0,"Rubella":25.0,"Hep B":73.0,"Hib":38.0,"PCV":6.0,"Rotavirus":6.0,"IPV":null},{"year":2010,"DTP3":83.0,"Polio":83.0,"Measles":84.0,"Rubella":34.0,"Hep B":72.0,"Hib":40.0,"PCV":10.0,"Rotavirus":8.0,"IPV":null},{"year":2011,"DTP3":84.0,"Polio":83.0,"Measles":84.0,"Rubella":37.0,"Hep B":74.0,"Hib":43.0,"PCV":15.0,"Rotavirus":9.0,"IPV":null},{"year":2012,"DTP3":84.0,"Polio":84.0,"Measles":84.0,"Rubella":39.0,"Hep B":79.0,"Hib":45.0,"PCV":19.0,"Rotavirus":11.0,"IPV":null},{"year":2013,"DTP3":83.0,"Polio":84.0,"Measles":84.0,"Rubella":42.0,"Hep B":78.0,"Hib":50.0,"PCV":26.0,"Rotavirus":14.0,"IPV":null},{"year":2014,"DTP3":85.0,"Polio":84.0,"Measles":84.0,"Rubella":44.0,"Hep B":81.0,"Hib":55.0,"PCV":32.0,"Rotavirus":18.0,"IPV":null},{"year":2015,"DTP3":85.0,"Polio":85.0,"Measles":84.0,"Rubella":46.0,"Hep B":83.0,"Hib":63.0,"PCV":38.0,"Rotavirus":22.0,"IPV":20.0},{"year":2016,"DTP3":86.0,"Polio":85.0,"Measles":85.0,"Rubella":47.0,"Hep B":84.0,"Hib":70.0,"PCV":41.0,"Rotavirus":24.0,"IPV":40.0},{"year":2017,"DTP3":86.0,"Polio":86.0,"Measles":85.0,"Rubella":51.0,"Hep B":84.0,"Hib":71.0,"PCV":45.0,"Rotavirus":27.0,"IPV":58.0},{"year":2018,"DTP3":86.0,"Polio":86.0,"Measles":86.0,"Rubella":68.0,"Hep B":84.0,"Hib":73.0,"PCV":48.0,"Rotavirus":35.0,"IPV":73.0},{"year":2019,"DTP3":86.0,"Polio":86.0,"Measles":86.0,"Rubella":69.0,"Hep B":86.0,"Hib":74.0,"PCV":51.0,"Rotavirus":40.0,"IPV":83.0},{"year":2020,"DTP3":83.0,"Polio":82.0,"Measles":83.0,"Rubella":68.0,"Hep B":83.0,"Hib":72.0,"PCV":52.0,"Rotavirus":47.0,"IPV":80.0},{"year":2021,"DTP3":82.0,"Polio":81.0,"Measles":81.0,"Rubella":66.0,"Hep B":81.0,"Hib":72.0,"PCV":52.0,"Rotavirus":49.0,"IPV":80.0},{"year":2022,"DTP3":85.0,"Polio":84.0,"Measles":83.0,"Rubella":72.0,"Hep B":84.0,"Hib":77.0,"PCV":61.0,"Rotavirus":52.0,"IPV":84.0},{"year":2023,"DTP3":84.0,"Polio":84.0,"Measles":83.0,"Rubella":71.0,"Hep B":84.0,"Hib":77.0,"PCV":63.0,"Rotavirus":56.0,"IPV":84.0},{"year":2024,"DTP3":85.0,"Polio":84.0,"Measles":84.0,"Rubella":73.0,"Hep B":84.0,"Hib":78.0,"PCV":67.0,"Rotavirus":59.0,"IPV":85.0}];
+const covidData = [{"entity":"Azerbaijan","pre":76.2,"post":51.8,"drop":24.5},{"entity":"Myanmar","pre":89.8,"post":65.8,"drop":24.0},{"entity":"Mozambique","pre":85.0,"post":63.0,"drop":22.0},{"entity":"Venezuela","pre":72.2,"post":51.8,"drop":20.5},{"entity":"Lebanon","pre":83.0,"post":64.5,"drop":18.5},{"entity":"Paraguay","pre":89.8,"post":72.2,"drop":17.5},{"entity":"Cook Islands","pre":98.8,"post":82.0,"drop":16.8},{"entity":"Grenada","pre":94.6,"post":78.0,"drop":16.6},{"entity":"Sudan","pre":93.4,"post":77.2,"drop":16.2},{"entity":"Honduras","pre":92.4,"post":77.0,"drop":15.4},{"entity":"Bolivia","pre":83.6,"post":68.5,"drop":15.1},{"entity":"Dominica","pre":96.2,"post":81.5,"drop":14.7},{"entity":"Djibouti","pre":79.4,"post":65.0,"drop":14.4},{"entity":"Libya","pre":87.4,"post":73.0,"drop":14.4},{"entity":"Vanuatu","pre":84.2,"post":70.0,"drop":14.2}];
+const country2024 = [{"iso":"AFG","name":"Afghanistan","DTP3":59,"Polio":59,"Measles":55,"Rubella":null,"HepB":59,"Hib":59,"PCV":57,"Rotavirus":56,"IPV":59},{"iso":"ALB","name":"Albania","DTP3":97,"Polio":97,"Measles":81,"Rubella":81,"HepB":97,"Hib":97,"PCV":81,"Rotavirus":98,"IPV":98},{"iso":"DZA","name":"Algeria","DTP3":92,"Polio":89,"Measles":94,"Rubella":94,"HepB":92,"Hib":92,"PCV":90,"Rotavirus":null,"IPV":98},{"iso":"AND","name":"Andorra","DTP3":98,"Polio":98,"Measles":98,"Rubella":98,"HepB":97,"Hib":98,"PCV":96,"Rotavirus":null,"IPV":98},{"iso":"AGO","name":"Angola","DTP3":64,"Polio":56,"Measles":53,"Rubella":53,"HepB":64,"Hib":64,"PCV":62,"Rotavirus":36,"IPV":58},{"iso":"ATG","name":"Antigua and Barbuda","DTP3":99,"Polio":99,"Measles":97,"Rubella":97,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"ARG","name":"Argentina","DTP3":75,"Polio":74,"Measles":82,"Rubella":82,"HepB":75,"Hib":75,"PCV":79,"Rotavirus":73,"IPV":81},{"iso":"ARM","name":"Armenia","DTP3":94,"Polio":94,"Measles":96,"Rubella":96,"HepB":94,"Hib":94,"PCV":94,"Rotavirus":94,"IPV":97},{"iso":"AUS","name":"Australia","DTP3":93,"Polio":94,"Measles":91,"Rubella":91,"HepB":95,"Hib":93,"PCV":95,"Rotavirus":68,"IPV":93},{"iso":"AUT","name":"Austria","DTP3":85,"Polio":85,"Measles":90,"Rubella":90,"HepB":85,"Hib":85,"PCV":null,"Rotavirus":61,"IPV":95},{"iso":"AZE","name":"Azerbaijan","DTP3":51,"Polio":67,"Measles":71,"Rubella":71,"HepB":51,"Hib":51,"PCV":52,"Rotavirus":null,"IPV":63},{"iso":"BHS","name":"Bahamas","DTP3":90,"Polio":90,"Measles":86,"Rubella":86,"HepB":90,"Hib":90,"PCV":90,"Rotavirus":88,"IPV":98},{"iso":"BHR","name":"Bahrain","DTP3":96,"Polio":98,"Measles":99,"Rubella":99,"HepB":96,"Hib":96,"PCV":99,"Rotavirus":94,"IPV":97},{"iso":"BGD","name":"Bangladesh","DTP3":97,"Polio":97,"Measles":96,"Rubella":96,"HepB":97,"Hib":97,"PCV":97,"Rotavirus":null,"IPV":99},{"iso":"BRB","name":"Barbados","DTP3":94,"Polio":94,"Measles":88,"Rubella":88,"HepB":94,"Hib":94,"PCV":94,"Rotavirus":null,"IPV":94},{"iso":"BLR","name":"Belarus","DTP3":98,"Polio":98,"Measles":98,"Rubella":98,"HepB":98,"Hib":98,"PCV":null,"Rotavirus":null,"IPV":98},{"iso":"BEL","name":"Belgium","DTP3":97,"Polio":98,"Measles":96,"Rubella":96,"HepB":97,"Hib":97,"PCV":94,"Rotavirus":86,"IPV":99},{"iso":"BLZ","name":"Belize","DTP3":88,"Polio":88,"Measles":84,"Rubella":84,"HepB":88,"Hib":88,"PCV":39,"Rotavirus":null,"IPV":89},{"iso":"BEN","name":"Benin","DTP3":63,"Polio":63,"Measles":44,"Rubella":44,"HepB":63,"Hib":63,"PCV":64,"Rotavirus":64,"IPV":63},{"iso":"BTN","name":"Bhutan","DTP3":98,"Polio":99,"Measles":97,"Rubella":97,"HepB":98,"Hib":98,"PCV":98,"Rotavirus":null,"IPV":99},{"iso":"BOL","name":"Bolivia","DTP3":59,"Polio":59,"Measles":67,"Rubella":67,"HepB":59,"Hib":59,"PCV":59,"Rotavirus":62,"IPV":68},{"iso":"BIH","name":"Bosnia and Herzegovina","DTP3":79,"Polio":79,"Measles":69,"Rubella":69,"HepB":82,"Hib":79,"PCV":null,"Rotavirus":null,"IPV":91},{"iso":"BWA","name":"Botswana","DTP3":95,"Polio":96,"Measles":97,"Rubella":97,"HepB":95,"Hib":94,"PCV":95,"Rotavirus":74,"IPV":95},{"iso":"BRA","name":"Brazil","DTP3":91,"Polio":82,"Measles":93,"Rubella":93,"HepB":90,"Hib":91,"PCV":86,"Rotavirus":87,"IPV":91},{"iso":"BRN","name":"Brunei","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"BGR","name":"Bulgaria","DTP3":94,"Polio":94,"Measles":94,"Rubella":94,"HepB":94,"Hib":94,"PCV":91,"Rotavirus":50,"IPV":96},{"iso":"BFA","name":"Burkina Faso","DTP3":91,"Polio":91,"Measles":88,"Rubella":88,"HepB":91,"Hib":91,"PCV":91,"Rotavirus":87,"IPV":91},{"iso":"BDI","name":"Burundi","DTP3":89,"Polio":89,"Measles":86,"Rubella":86,"HepB":89,"Hib":89,"PCV":88,"Rotavirus":89,"IPV":86},{"iso":"KHM","name":"Cambodia","DTP3":83,"Polio":84,"Measles":83,"Rubella":83,"HepB":83,"Hib":83,"PCV":83,"Rotavirus":null,"IPV":84},{"iso":"CMR","name":"Cameroon","DTP3":77,"Polio":76,"Measles":71,"Rubella":71,"HepB":77,"Hib":77,"PCV":76,"Rotavirus":73,"IPV":75},{"iso":"CAN","name":"Canada","DTP3":92,"Polio":92,"Measles":92,"Rubella":92,"HepB":83,"Hib":90,"PCV":85,"Rotavirus":87,"IPV":92},{"iso":"CPV","name":"Cape Verde","DTP3":93,"Polio":94,"Measles":95,"Rubella":95,"HepB":93,"Hib":93,"PCV":null,"Rotavirus":null,"IPV":94},{"iso":"CAF","name":"Central African Republic","DTP3":42,"Polio":48,"Measles":41,"Rubella":null,"HepB":42,"Hib":42,"PCV":42,"Rotavirus":null,"IPV":42},{"iso":"TCD","name":"Chad","DTP3":68,"Polio":67,"Measles":66,"Rubella":null,"HepB":68,"Hib":68,"PCV":null,"Rotavirus":null,"IPV":67},{"iso":"CHL","name":"Chile","DTP3":95,"Polio":95,"Measles":93,"Rubella":93,"HepB":95,"Hib":95,"PCV":93,"Rotavirus":null,"IPV":98},{"iso":"CHN","name":"China","DTP3":97,"Polio":97,"Measles":95,"Rubella":95,"HepB":96,"Hib":null,"PCV":null,"Rotavirus":null,"IPV":97},{"iso":"COL","name":"Colombia","DTP3":89,"Polio":89,"Measles":93,"Rubella":93,"HepB":89,"Hib":89,"PCV":91,"Rotavirus":86,"IPV":88},{"iso":"COM","name":"Comoros","DTP3":75,"Polio":62,"Measles":70,"Rubella":70,"HepB":75,"Hib":75,"PCV":null,"Rotavirus":null,"IPV":75},{"iso":"COG","name":"Congo","DTP3":78,"Polio":76,"Measles":72,"Rubella":72,"HepB":78,"Hib":78,"PCV":76,"Rotavirus":58,"IPV":74},{"iso":"COK","name":"Cook Islands","DTP3":75,"Polio":75,"Measles":99,"Rubella":99,"HepB":75,"Hib":75,"PCV":52,"Rotavirus":85,"IPV":75},{"iso":"CRI","name":"Costa Rica","DTP3":99,"Polio":99,"Measles":93,"Rubella":93,"HepB":99,"Hib":99,"PCV":99,"Rotavirus":96,"IPV":98},{"iso":"CIV","name":"Cote d'Ivoire","DTP3":77,"Polio":74,"Measles":75,"Rubella":75,"HepB":77,"Hib":77,"PCV":75,"Rotavirus":75,"IPV":81},{"iso":"HRV","name":"Croatia","DTP3":92,"Polio":92,"Measles":90,"Rubella":90,"HepB":91,"Hib":92,"PCV":89,"Rotavirus":null,"IPV":98},{"iso":"CUB","name":"Cuba","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"CYP","name":"Cyprus","DTP3":94,"Polio":94,"Measles":99,"Rubella":99,"HepB":94,"Hib":94,"PCV":82,"Rotavirus":null,"IPV":99},{"iso":"CZE","name":"Czechia","DTP3":86,"Polio":86,"Measles":89,"Rubella":89,"HepB":86,"Hib":86,"PCV":null,"Rotavirus":null,"IPV":97},{"iso":"COD","name":"Democratic Republic of Congo","DTP3":65,"Polio":65,"Measles":55,"Rubella":null,"HepB":65,"Hib":65,"PCV":63,"Rotavirus":63,"IPV":69},{"iso":"DNK","name":"Denmark","DTP3":96,"Polio":96,"Measles":94,"Rubella":94,"HepB":null,"Hib":96,"PCV":96,"Rotavirus":null,"IPV":97},{"iso":"DJI","name":"Djibouti","DTP3":77,"Polio":77,"Measles":75,"Rubella":null,"HepB":77,"Hib":77,"PCV":76,"Rotavirus":84,"IPV":82},{"iso":"DMA","name":"Dominica","DTP3":90,"Polio":90,"Measles":80,"Rubella":80,"HepB":90,"Hib":90,"PCV":null,"Rotavirus":null,"IPV":96},{"iso":"DOM","name":"Dominican Republic","DTP3":87,"Polio":88,"Measles":89,"Rubella":89,"HepB":86,"Hib":86,"PCV":87,"Rotavirus":83,"IPV":98},{"iso":"TLS","name":"East Timor","DTP3":83,"Polio":83,"Measles":72,"Rubella":72,"HepB":83,"Hib":83,"PCV":81,"Rotavirus":76,"IPV":80},{"iso":"ECU","name":"Ecuador","DTP3":70,"Polio":59,"Measles":74,"Rubella":74,"HepB":70,"Hib":70,"PCV":71,"Rotavirus":73,"IPV":75},{"iso":"EGY","name":"Egypt","DTP3":97,"Polio":97,"Measles":97,"Rubella":97,"HepB":97,"Hib":97,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"SLV","name":"El Salvador","DTP3":95,"Polio":95,"Measles":96,"Rubella":96,"HepB":95,"Hib":95,"PCV":96,"Rotavirus":97,"IPV":98},{"iso":"GNQ","name":"Equatorial Guinea","DTP3":68,"Polio":67,"Measles":53,"Rubella":null,"HepB":68,"Hib":68,"PCV":null,"Rotavirus":null,"IPV":68},{"iso":"ERI","name":"Eritrea","DTP3":95,"Polio":95,"Measles":93,"Rubella":93,"HepB":95,"Hib":95,"PCV":95,"Rotavirus":96,"IPV":95},{"iso":"EST","name":"Estonia","DTP3":81,"Polio":81,"Measles":83,"Rubella":83,"HepB":81,"Hib":81,"PCV":null,"Rotavirus":75,"IPV":82},{"iso":"SWZ","name":"Eswatini","DTP3":84,"Polio":70,"Measles":85,"Rubella":85,"HepB":84,"Hib":84,"PCV":78,"Rotavirus":99,"IPV":70},{"iso":"ETH","name":"Ethiopia","DTP3":73,"Polio":73,"Measles":72,"Rubella":null,"HepB":73,"Hib":73,"PCV":73,"Rotavirus":73,"IPV":73},{"iso":"FJI","name":"Fiji","DTP3":94,"Polio":93,"Measles":91,"Rubella":91,"HepB":93,"Hib":94,"PCV":92,"Rotavirus":94,"IPV":94},{"iso":"FIN","name":"Finland","DTP3":91,"Polio":91,"Measles":94,"Rubella":94,"HepB":null,"Hib":91,"PCV":87,"Rotavirus":85,"IPV":97},{"iso":"FRA","name":"France","DTP3":96,"Polio":96,"Measles":95,"Rubella":95,"HepB":96,"Hib":96,"PCV":96,"Rotavirus":null,"IPV":99},{"iso":"GAB","name":"Gabon","DTP3":61,"Polio":60,"Measles":57,"Rubella":null,"HepB":61,"Hib":61,"PCV":null,"Rotavirus":null,"IPV":61},{"iso":"GMB","name":"Gambia","DTP3":80,"Polio":80,"Measles":83,"Rubella":83,"HepB":80,"Hib":80,"PCV":80,"Rotavirus":80,"IPV":80},{"iso":"GEO","name":"Georgia","DTP3":86,"Polio":86,"Measles":90,"Rubella":90,"HepB":90,"Hib":86,"PCV":82,"Rotavirus":74,"IPV":95},{"iso":"DEU","name":"Germany","DTP3":89,"Polio":88,"Measles":96,"Rubella":96,"HepB":85,"Hib":88,"PCV":75,"Rotavirus":68,"IPV":97},{"iso":"GHA","name":"Ghana","DTP3":95,"Polio":91,"Measles":90,"Rubella":90,"HepB":95,"Hib":95,"PCV":96,"Rotavirus":82,"IPV":95},{"iso":"GRC","name":"Greece","DTP3":95,"Polio":95,"Measles":91,"Rubella":91,"HepB":92,"Hib":99,"PCV":90,"Rotavirus":20,"IPV":98},{"iso":"GRD","name":"Grenada","DTP3":93,"Polio":93,"Measles":83,"Rubella":83,"HepB":86,"Hib":93,"PCV":null,"Rotavirus":null,"IPV":93},{"iso":"GTM","name":"Guatemala","DTP3":81,"Polio":81,"Measles":90,"Rubella":90,"HepB":81,"Hib":81,"PCV":89,"Rotavirus":80,"IPV":86},{"iso":"GIN","name":"Guinea","DTP3":63,"Polio":55,"Measles":60,"Rubella":null,"HepB":63,"Hib":63,"PCV":null,"Rotavirus":null,"IPV":63},{"iso":"GNB","name":"Guinea-Bissau","DTP3":68,"Polio":68,"Measles":65,"Rubella":null,"HepB":68,"Hib":68,"PCV":74,"Rotavirus":70,"IPV":68},{"iso":"GUY","name":"Guyana","DTP3":98,"Polio":99,"Measles":99,"Rubella":99,"HepB":98,"Hib":98,"PCV":98,"Rotavirus":94,"IPV":99},{"iso":"HTI","name":"Haiti","DTP3":60,"Polio":47,"Measles":77,"Rubella":77,"HepB":60,"Hib":60,"PCV":45,"Rotavirus":49,"IPV":70},{"iso":"HND","name":"Honduras","DTP3":75,"Polio":75,"Measles":79,"Rubella":79,"HepB":75,"Hib":75,"PCV":75,"Rotavirus":75,"IPV":74},{"iso":"HUN","name":"Hungary","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":null,"Hib":99,"PCV":99,"Rotavirus":null,"IPV":99},{"iso":"ISL","name":"Iceland","DTP3":94,"Polio":94,"Measles":97,"Rubella":97,"HepB":null,"Hib":94,"PCV":93,"Rotavirus":null,"IPV":98},{"iso":"IND","name":"India","DTP3":94,"Polio":93,"Measles":97,"Rubella":97,"HepB":94,"Hib":94,"PCV":95,"Rotavirus":92,"IPV":93},{"iso":"IDN","name":"Indonesia","DTP3":78,"Polio":87,"Measles":85,"Rubella":85,"HepB":78,"Hib":69,"PCV":70,"Rotavirus":71,"IPV":81},{"iso":"IRN","name":"Iran","DTP3":98,"Polio":99,"Measles":99,"Rubella":99,"HepB":98,"Hib":98,"PCV":0,"Rotavirus":2,"IPV":99},{"iso":"IRQ","name":"Iraq","DTP3":90,"Polio":91,"Measles":91,"Rubella":91,"HepB":90,"Hib":90,"PCV":65,"Rotavirus":64,"IPV":95},{"iso":"IRL","name":"Ireland","DTP3":92,"Polio":92,"Measles":90,"Rubella":90,"HepB":92,"Hib":92,"PCV":84,"Rotavirus":88,"IPV":93},{"iso":"ISR","name":"Israel","DTP3":98,"Polio":98,"Measles":98,"Rubella":98,"HepB":96,"Hib":98,"PCV":94,"Rotavirus":80,"IPV":99},{"iso":"ITA","name":"Italy","DTP3":94,"Polio":94,"Measles":95,"Rubella":95,"HepB":94,"Hib":95,"PCV":90,"Rotavirus":70,"IPV":94},{"iso":"JAM","name":"Jamaica","DTP3":99,"Polio":98,"Measles":94,"Rubella":94,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":94},{"iso":"JPN","name":"Japan","DTP3":99,"Polio":98,"Measles":95,"Rubella":95,"HepB":95,"Hib":96,"PCV":91,"Rotavirus":94,"IPV":98},{"iso":"JOR","name":"Jordan","DTP3":96,"Polio":94,"Measles":99,"Rubella":99,"HepB":96,"Hib":96,"PCV":null,"Rotavirus":93,"IPV":97},{"iso":"KAZ","name":"Kazakhstan","DTP3":98,"Polio":98,"Measles":93,"Rubella":93,"HepB":98,"Hib":98,"PCV":90,"Rotavirus":null,"IPV":99},{"iso":"KEN","name":"Kenya","DTP3":91,"Polio":85,"Measles":88,"Rubella":88,"HepB":91,"Hib":91,"PCV":89,"Rotavirus":82,"IPV":88},{"iso":"KIR","name":"Kiribati","DTP3":94,"Polio":91,"Measles":79,"Rubella":79,"HepB":94,"Hib":94,"PCV":93,"Rotavirus":90,"IPV":94},{"iso":"KWT","name":"Kuwait","DTP3":99,"Polio":99,"Measles":98,"Rubella":98,"HepB":99,"Hib":99,"PCV":96,"Rotavirus":88,"IPV":99},{"iso":"KGZ","name":"Kyrgyzstan","DTP3":85,"Polio":92,"Measles":96,"Rubella":96,"HepB":84,"Hib":84,"PCV":86,"Rotavirus":85,"IPV":85},{"iso":"LAO","name":"Laos","DTP3":67,"Polio":70,"Measles":69,"Rubella":69,"HepB":67,"Hib":67,"PCV":63,"Rotavirus":null,"IPV":63},{"iso":"LVA","name":"Latvia","DTP3":97,"Polio":97,"Measles":98,"Rubella":98,"HepB":99,"Hib":97,"PCV":92,"Rotavirus":86,"IPV":98},{"iso":"LBN","name":"Lebanon","DTP3":49,"Polio":47,"Measles":67,"Rubella":67,"HepB":46,"Hib":51,"PCV":67,"Rotavirus":45,"IPV":86},{"iso":"LSO","name":"Lesotho","DTP3":86,"Polio":86,"Measles":90,"Rubella":90,"HepB":86,"Hib":86,"PCV":86,"Rotavirus":72,"IPV":87},{"iso":"LBR","name":"Liberia","DTP3":83,"Polio":72,"Measles":82,"Rubella":null,"HepB":83,"Hib":83,"PCV":80,"Rotavirus":82,"IPV":82},{"iso":"LBY","name":"Libya","DTP3":86,"Polio":86,"Measles":89,"Rubella":89,"HepB":86,"Hib":86,"PCV":89,"Rotavirus":82,"IPV":90},{"iso":"LTU","name":"Lithuania","DTP3":89,"Polio":89,"Measles":86,"Rubella":86,"HepB":87,"Hib":89,"PCV":87,"Rotavirus":77,"IPV":92},{"iso":"LUX","name":"Luxembourg","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":98,"Hib":99,"PCV":97,"Rotavirus":89,"IPV":99},{"iso":"MDG","name":"Madagascar","DTP3":60,"Polio":62,"Measles":46,"Rubella":null,"HepB":60,"Hib":60,"PCV":64,"Rotavirus":60,"IPV":63},{"iso":"MWI","name":"Malawi","DTP3":91,"Polio":90,"Measles":89,"Rubella":89,"HepB":91,"Hib":91,"PCV":92,"Rotavirus":89,"IPV":90},{"iso":"MYS","name":"Malaysia","DTP3":93,"Polio":93,"Measles":96,"Rubella":96,"HepB":93,"Hib":93,"PCV":90,"Rotavirus":null,"IPV":93},{"iso":"MDV","name":"Maldives","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"MLI","name":"Mali","DTP3":82,"Polio":72,"Measles":72,"Rubella":36,"HepB":82,"Hib":82,"PCV":83,"Rotavirus":75,"IPV":76},{"iso":"MLT","name":"Malta","DTP3":97,"Polio":97,"Measles":88,"Rubella":88,"HepB":97,"Hib":97,"PCV":97,"Rotavirus":null,"IPV":99},{"iso":"MHL","name":"Marshall Islands","DTP3":85,"Polio":84,"Measles":88,"Rubella":88,"HepB":89,"Hib":72,"PCV":62,"Rotavirus":44,"IPV":98},{"iso":"MRT","name":"Mauritania","DTP3":86,"Polio":85,"Measles":93,"Rubella":93,"HepB":86,"Hib":86,"PCV":85,"Rotavirus":86,"IPV":84},{"iso":"MUS","name":"Mauritius","DTP3":93,"Polio":95,"Measles":98,"Rubella":98,"HepB":93,"Hib":93,"PCV":95,"Rotavirus":95,"IPV":96},{"iso":"MEX","name":"Mexico","DTP3":78,"Polio":78,"Measles":80,"Rubella":80,"HepB":78,"Hib":78,"PCV":76,"Rotavirus":80,"IPV":83},{"iso":"FSM","name":"Micronesia (country)","DTP3":76,"Polio":76,"Measles":81,"Rubella":81,"HepB":85,"Hib":71,"PCV":74,"Rotavirus":29,"IPV":96},{"iso":"MDA","name":"Moldova","DTP3":86,"Polio":89,"Measles":84,"Rubella":84,"HepB":88,"Hib":87,"PCV":85,"Rotavirus":64,"IPV":87},{"iso":"MCO","name":"Monaco","DTP3":99,"Polio":99,"Measles":88,"Rubella":88,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"MNG","name":"Mongolia","DTP3":96,"Polio":96,"Measles":96,"Rubella":96,"HepB":96,"Hib":96,"PCV":96,"Rotavirus":null,"IPV":95},{"iso":"MNE","name":"Montenegro","DTP3":81,"Polio":81,"Measles":23,"Rubella":23,"HepB":61,"Hib":81,"PCV":null,"Rotavirus":null,"IPV":92},{"iso":"MAR","name":"Morocco","DTP3":96,"Polio":96,"Measles":98,"Rubella":98,"HepB":96,"Hib":96,"PCV":77,"Rotavirus":92,"IPV":95},{"iso":"MOZ","name":"Mozambique","DTP3":70,"Polio":78,"Measles":65,"Rubella":65,"HepB":70,"Hib":70,"PCV":55,"Rotavirus":60,"IPV":86},{"iso":"MMR","name":"Myanmar","DTP3":71,"Polio":71,"Measles":71,"Rubella":71,"HepB":71,"Hib":71,"PCV":71,"Rotavirus":67,"IPV":73},{"iso":"NAM","name":"Namibia","DTP3":74,"Polio":75,"Measles":79,"Rubella":79,"HepB":74,"Hib":75,"PCV":76,"Rotavirus":75,"IPV":77},{"iso":"NRU","name":"Nauru","DTP3":99,"Polio":97,"Measles":98,"Rubella":98,"HepB":97,"Hib":97,"PCV":97,"Rotavirus":97,"IPV":97},{"iso":"NPL","name":"Nepal","DTP3":97,"Polio":97,"Measles":97,"Rubella":97,"HepB":97,"Hib":97,"PCV":96,"Rotavirus":96,"IPV":96},{"iso":"NLD","name":"Netherlands","DTP3":91,"Polio":91,"Measles":89,"Rubella":89,"HepB":89,"Hib":89,"PCV":88,"Rotavirus":null,"IPV":91},{"iso":"NZL","name":"New Zealand","DTP3":89,"Polio":89,"Measles":89,"Rubella":89,"HepB":89,"Hib":89,"PCV":60,"Rotavirus":84,"IPV":94},{"iso":"NER","name":"Niger","DTP3":86,"Polio":86,"Measles":81,"Rubella":null,"HepB":86,"Hib":86,"PCV":86,"Rotavirus":90,"IPV":86},{"iso":"NGA","name":"Nigeria","DTP3":67,"Polio":69,"Measles":57,"Rubella":null,"HepB":67,"Hib":67,"PCV":28,"Rotavirus":57,"IPV":67},{"iso":"NIU","name":"Niue","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":99,"Rotavirus":99,"IPV":99},{"iso":"PRK","name":"North Korea","DTP3":99,"Polio":0,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":50},{"iso":"MKD","name":"North Macedonia","DTP3":89,"Polio":89,"Measles":73,"Rubella":73,"HepB":91,"Hib":91,"PCV":72,"Rotavirus":71,"IPV":93},{"iso":"NOR","name":"Norway","DTP3":97,"Polio":97,"Measles":96,"Rubella":96,"HepB":96,"Hib":97,"PCV":95,"Rotavirus":95,"IPV":99},{"iso":"OMN","name":"Oman","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":99,"Rotavirus":null,"IPV":99},{"iso":"PAK","name":"Pakistan","DTP3":87,"Polio":87,"Measles":86,"Rubella":86,"HepB":87,"Hib":87,"PCV":87,"Rotavirus":90,"IPV":87},{"iso":"PLW","name":"Palau","DTP3":97,"Polio":97,"Measles":96,"Rubella":96,"HepB":99,"Hib":99,"PCV":93,"Rotavirus":60,"IPV":99},{"iso":"PSE","name":"Palestine","DTP3":88,"Polio":89,"Measles":89,"Rubella":89,"HepB":91,"Hib":88,"PCV":87,"Rotavirus":83,"IPV":86},{"iso":"PAN","name":"Panama","DTP3":72,"Polio":72,"Measles":93,"Rubella":93,"HepB":72,"Hib":72,"PCV":83,"Rotavirus":88,"IPV":91},{"iso":"PNG","name":"Papua New Guinea","DTP3":42,"Polio":42,"Measles":44,"Rubella":44,"HepB":42,"Hib":42,"PCV":41,"Rotavirus":null,"IPV":52},{"iso":"PRY","name":"Paraguay","DTP3":80,"Polio":80,"Measles":90,"Rubella":90,"HepB":80,"Hib":80,"PCV":91,"Rotavirus":80,"IPV":82},{"iso":"PER","name":"Peru","DTP3":80,"Polio":80,"Measles":89,"Rubella":89,"HepB":80,"Hib":80,"PCV":82,"Rotavirus":82,"IPV":83},{"iso":"PHL","name":"Philippines","DTP3":71,"Polio":88,"Measles":80,"Rubella":80,"HepB":71,"Hib":71,"PCV":59,"Rotavirus":null,"IPV":82},{"iso":"POL","name":"Poland","DTP3":94,"Polio":86,"Measles":92,"Rubella":92,"HepB":87,"Hib":94,"PCV":89,"Rotavirus":87,"IPV":99},{"iso":"PRT","name":"Portugal","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":98,"Rotavirus":null,"IPV":99},{"iso":"QAT","name":"Qatar","DTP3":96,"Polio":98,"Measles":99,"Rubella":99,"HepB":96,"Hib":96,"PCV":96,"Rotavirus":95,"IPV":99},{"iso":"ROU","name":"Romania","DTP3":79,"Polio":79,"Measles":78,"Rubella":78,"HepB":79,"Hib":79,"PCV":78,"Rotavirus":null,"IPV":79},{"iso":"RUS","name":"Russia","DTP3":97,"Polio":97,"Measles":97,"Rubella":97,"HepB":97,"Hib":96,"PCV":94,"Rotavirus":null,"IPV":97},{"iso":"RWA","name":"Rwanda","DTP3":98,"Polio":98,"Measles":97,"Rubella":97,"HepB":98,"Hib":98,"PCV":98,"Rotavirus":98,"IPV":98},{"iso":"KNA","name":"Saint Kitts and Nevis","DTP3":97,"Polio":97,"Measles":95,"Rubella":95,"HepB":97,"Hib":97,"PCV":null,"Rotavirus":null,"IPV":97},{"iso":"LCA","name":"Saint Lucia","DTP3":99,"Polio":87,"Measles":83,"Rubella":83,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"VCT","name":"Saint Vincent and the Grenadines","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":null,"Rotavirus":null,"IPV":99},{"iso":"WSM","name":"Samoa","DTP3":85,"Polio":85,"Measles":85,"Rubella":85,"HepB":85,"Hib":85,"PCV":75,"Rotavirus":83,"IPV":86},{"iso":"SMR","name":"San Marino","DTP3":88,"Polio":88,"Measles":85,"Rubella":85,"HepB":88,"Hib":87,"PCV":81,"Rotavirus":null,"IPV":88},{"iso":"STP","name":"Sao Tome and Principe","DTP3":87,"Polio":85,"Measles":87,"Rubella":87,"HepB":87,"Hib":87,"PCV":86,"Rotavirus":87,"IPV":87},{"iso":"SAU","name":"Saudi Arabia","DTP3":97,"Polio":97,"Measles":96,"Rubella":96,"HepB":97,"Hib":97,"PCV":96,"Rotavirus":97,"IPV":97},{"iso":"SEN","name":"Senegal","DTP3":91,"Polio":91,"Measles":87,"Rubella":87,"HepB":91,"Hib":91,"PCV":91,"Rotavirus":91,"IPV":96},{"iso":"SRB","name":"Serbia","DTP3":95,"Polio":95,"Measles":84,"Rubella":84,"HepB":93,"Hib":95,"PCV":85,"Rotavirus":null,"IPV":95},{"iso":"SYC","name":"Seychelles","DTP3":94,"Polio":94,"Measles":97,"Rubella":97,"HepB":94,"Hib":94,"PCV":94,"Rotavirus":99,"IPV":99},{"iso":"SLE","name":"Sierra Leone","DTP3":91,"Polio":91,"Measles":90,"Rubella":90,"HepB":91,"Hib":91,"PCV":93,"Rotavirus":88,"IPV":91},{"iso":"SGP","name":"Singapore","DTP3":97,"Polio":97,"Measles":97,"Rubella":97,"HepB":96,"Hib":97,"PCV":91,"Rotavirus":null,"IPV":98},{"iso":"SVK","name":"Slovakia","DTP3":96,"Polio":96,"Measles":94,"Rubella":94,"HepB":96,"Hib":96,"PCV":96,"Rotavirus":null,"IPV":96},{"iso":"SVN","name":"Slovenia","DTP3":90,"Polio":90,"Measles":95,"Rubella":95,"HepB":90,"Hib":90,"PCV":56,"Rotavirus":null,"IPV":90},{"iso":"SLB","name":"Solomon Islands","DTP3":87,"Polio":85,"Measles":78,"Rubella":78,"HepB":87,"Hib":87,"PCV":88,"Rotavirus":79,"IPV":84},{"iso":"SOM","name":"Somalia","DTP3":70,"Polio":71,"Measles":64,"Rubella":null,"HepB":70,"Hib":70,"PCV":null,"Rotavirus":null,"IPV":70},{"iso":"ZAF","name":"South Africa","DTP3":74,"Polio":74,"Measles":76,"Rubella":null,"HepB":74,"Hib":74,"PCV":81,"Rotavirus":73,"IPV":76},{"iso":"KOR","name":"South Korea","DTP3":97,"Polio":97,"Measles":97,"Rubella":97,"HepB":97,"Hib":97,"PCV":97,"Rotavirus":94,"IPV":98},{"iso":"SSD","name":"South Sudan","DTP3":73,"Polio":72,"Measles":72,"Rubella":null,"HepB":73,"Hib":73,"PCV":null,"Rotavirus":null,"IPV":67},{"iso":"ESP","name":"Spain","DTP3":94,"Polio":94,"Measles":97,"Rubella":97,"HepB":94,"Hib":94,"PCV":92,"Rotavirus":70,"IPV":98},{"iso":"LKA","name":"Sri Lanka","DTP3":97,"Polio":97,"Measles":99,"Rubella":99,"HepB":97,"Hib":97,"PCV":null,"Rotavirus":null,"IPV":97},{"iso":"SDN","name":"Sudan","DTP3":39,"Polio":40,"Measles":46,"Rubella":46,"HepB":39,"Hib":39,"PCV":40,"Rotavirus":37,"IPV":50},{"iso":"SUR","name":"Suriname","DTP3":69,"Polio":72,"Measles":73,"Rubella":73,"HepB":69,"Hib":69,"PCV":null,"Rotavirus":null,"IPV":77},{"iso":"SWE","name":"Sweden","DTP3":96,"Polio":95,"Measles":93,"Rubella":93,"HepB":95,"Hib":95,"PCV":94,"Rotavirus":85,"IPV":97},{"iso":"CHE","name":"Switzerland","DTP3":96,"Polio":96,"Measles":96,"Rubella":96,"HepB":86,"Hib":95,"PCV":91,"Rotavirus":11,"IPV":97},{"iso":"SYR","name":"Syria","DTP3":73,"Polio":75,"Measles":81,"Rubella":81,"HepB":73,"Hib":73,"PCV":null,"Rotavirus":null,"IPV":81},{"iso":"TJK","name":"Tajikistan","DTP3":97,"Polio":97,"Measles":98,"Rubella":98,"HepB":97,"Hib":97,"PCV":96,"Rotavirus":98,"IPV":97},{"iso":"TZA","name":"Tanzania","DTP3":83,"Polio":80,"Measles":84,"Rubella":84,"HepB":83,"Hib":83,"PCV":82,"Rotavirus":81,"IPV":83},{"iso":"THA","name":"Thailand","DTP3":92,"Polio":93,"Measles":93,"Rubella":93,"HepB":92,"Hib":83,"PCV":null,"Rotavirus":75,"IPV":92},{"iso":"TGO","name":"Togo","DTP3":90,"Polio":89,"Measles":81,"Rubella":81,"HepB":90,"Hib":90,"PCV":89,"Rotavirus":91,"IPV":90},{"iso":"TON","name":"Tonga","DTP3":99,"Polio":99,"Measles":99,"Rubella":99,"HepB":99,"Hib":99,"PCV":99,"Rotavirus":99,"IPV":99},{"iso":"TTO","name":"Trinidad and Tobago","DTP3":92,"Polio":92,"Measles":96,"Rubella":96,"HepB":92,"Hib":92,"PCV":91,"Rotavirus":null,"IPV":90},{"iso":"TUN","name":"Tunisia","DTP3":97,"Polio":96,"Measles":96,"Rubella":96,"HepB":97,"Hib":97,"PCV":97,"Rotavirus":null,"IPV":96},{"iso":"TUR","name":"Turkey","DTP3":99,"Polio":99,"Measles":95,"Rubella":95,"HepB":99,"Hib":99,"PCV":95,"Rotavirus":null,"IPV":96},{"iso":"TKM","name":"Turkmenistan","DTP3":98,"Polio":98,"Measles":99,"Rubella":99,"HepB":99,"Hib":98,"PCV":99,"Rotavirus":98,"IPV":99},{"iso":"TUV","name":"Tuvalu","DTP3":94,"Polio":94,"Measles":97,"Rubella":97,"HepB":94,"Hib":94,"PCV":97,"Rotavirus":94,"IPV":99},{"iso":"UGA","name":"Uganda","DTP3":91,"Polio":89,"Measles":90,"Rubella":90,"HepB":91,"Hib":91,"PCV":91,"Rotavirus":86,"IPV":96},{"iso":"UKR","name":"Ukraine","DTP3":88,"Polio":88,"Measles":91,"Rubella":91,"HepB":88,"Hib":93,"PCV":null,"Rotavirus":null,"IPV":90},{"iso":"ARE","name":"United Arab Emirates","DTP3":96,"Polio":95,"Measles":98,"Rubella":98,"HepB":93,"Hib":96,"PCV":94,"Rotavirus":90,"IPV":96},{"iso":"GBR","name":"United Kingdom","DTP3":92,"Polio":92,"Measles":89,"Rubella":89,"HepB":92,"Hib":92,"PCV":89,"Rotavirus":89,"IPV":92},{"iso":"USA","name":"United States","DTP3":94,"Polio":93,"Measles":92,"Rubella":92,"HepB":93,"Hib":92,"PCV":84,"Rotavirus":77,"IPV":97},{"iso":"URY","name":"Uruguay","DTP3":94,"Polio":94,"Measles":97,"Rubella":97,"HepB":94,"Hib":94,"PCV":96,"Rotavirus":null,"IPV":97},{"iso":"UZB","name":"Uzbekistan","DTP3":90,"Polio":87,"Measles":99,"Rubella":99,"HepB":88,"Hib":90,"PCV":94,"Rotavirus":99,"IPV":97},{"iso":"VUT","name":"Vanuatu","DTP3":71,"Polio":65,"Measles":61,"Rubella":61,"HepB":71,"Hib":71,"PCV":74,"Rotavirus":77,"IPV":74},{"iso":"VEN","name":"Venezuela","DTP3":62,"Polio":62,"Measles":71,"Rubella":71,"HepB":62,"Hib":62,"PCV":0,"Rotavirus":0,"IPV":67},{"iso":"VNM","name":"Vietnam","DTP3":97,"Polio":73,"Measles":98,"Rubella":95,"HepB":97,"Hib":97,"PCV":null,"Rotavirus":null,"IPV":93},{"iso":"YEM","name":"Yemen","DTP3":42,"Polio":42,"Measles":41,"Rubella":41,"HepB":42,"Hib":42,"PCV":41,"Rotavirus":42,"IPV":45},{"iso":"ZMB","name":"Zambia","DTP3":91,"Polio":90,"Measles":88,"Rubella":88,"HepB":91,"Hib":91,"PCV":91,"Rotavirus":58,"IPV":87},{"iso":"ZWE","name":"Zimbabwe","DTP3":91,"Polio":91,"Measles":90,"Rubella":90,"HepB":91,"Hib":91,"PCV":91,"Rotavirus":85,"IPV":88}];
+const scatter2024 = [{"iso":"ALB","name":"Albania","dtp3":97,"gdp":21641.074,"region":"Europe"},{"iso":"DZA","name":"Algeria","dtp3":92,"gdp":15501.92,"region":"Africa"},{"iso":"AND","name":"Andorra","dtp3":98,"gdp":65928.305,"region":"Europe"},{"iso":"AGO","name":"Angola","dtp3":64,"gdp":8901.888,"region":"Africa"},{"iso":"ATG","name":"Antigua and Barbuda","dtp3":99,"gdp":29371.639,"region":"North America"},{"iso":"ARG","name":"Argentina","dtp3":75,"gdp":26771.965,"region":"South America"},{"iso":"ARM","name":"Armenia","dtp3":94,"gdp":20078.785,"region":"Asia"},{"iso":"AUS","name":"Australia","dtp3":93,"gdp":60303.98,"region":"Oceania"},{"iso":"AUT","name":"Austria","dtp3":85,"gdp":63788.08,"region":"Europe"},{"iso":"AZE","name":"Azerbaijan","dtp3":51,"gdp":22072.148,"region":"Asia"},{"iso":"BHS","name":"Bahamas","dtp3":90,"gdp":36244.05,"region":"North America"},{"iso":"BHR","name":"Bahrain","dtp3":96,"gdp":58891.832,"region":"Asia"},{"iso":"BGD","name":"Bangladesh","dtp3":97,"gdp":8486.785,"region":"Asia"},{"iso":"BRB","name":"Barbados","dtp3":94,"gdp":21837.725,"region":"North America"},{"iso":"BLR","name":"Belarus","dtp3":98,"gdp":29040.973,"region":"Europe"},{"iso":"BEL","name":"Belgium","dtp3":97,"gdp":63347.785,"region":"Europe"},{"iso":"BLZ","name":"Belize","dtp3":88,"gdp":12621.408,"region":"North America"},{"iso":"BEN","name":"Benin","dtp3":63,"gdp":3901.326,"region":"Africa"},{"iso":"BOL","name":"Bolivia","dtp3":59,"gdp":11329.151,"region":"South America"},{"iso":"BIH","name":"Bosnia and Herzegovina","dtp3":79,"gdp":20527.693,"region":"Europe"},{"iso":"BWA","name":"Botswana","dtp3":95,"gdp":18068.506,"region":"Africa"},{"iso":"BRA","name":"Brazil","dtp3":91,"gdp":19652.365,"region":"South America"},{"iso":"BRN","name":"Brunei","dtp3":99,"gdp":79071.734,"region":"Asia"},{"iso":"BGR","name":"Bulgaria","dtp3":94,"gdp":34221.53,"region":"Europe"},{"iso":"BFA","name":"Burkina Faso","dtp3":91,"gdp":2547.6724,"region":"Africa"},{"iso":"BDI","name":"Burundi","dtp3":89,"gdp":1051.2593,"region":"Africa"},{"iso":"KHM","name":"Cambodia","dtp3":83,"gdp":7008.889,"region":"Asia"},{"iso":"CMR","name":"Cameroon","dtp3":77,"gdp":4916.9336,"region":"Africa"},{"iso":"CAN","name":"Canada","dtp3":92,"gdp":56706.824,"region":"North America"},{"iso":"CPV","name":"Cape Verde","dtp3":93,"gdp":9848.953,"region":"Africa"},{"iso":"CAF","name":"Central African Republic","dtp3":42,"gdp":1111.2194,"region":"Africa"},{"iso":"TCD","name":"Chad","dtp3":68,"gdp":2412.866,"region":"Africa"},{"iso":"CHL","name":"Chile","dtp3":95,"gdp":30182.787,"region":"South America"},{"iso":"CHN","name":"China","dtp3":97,"gdp":23845.62,"region":"Asia"},{"iso":"COL","name":"Colombia","dtp3":89,"gdp":18477.215,"region":"South America"},{"iso":"COM","name":"Comoros","dtp3":75,"gdp":3482.535,"region":"Africa"},{"iso":"COG","name":"Congo","dtp3":78,"gdp":6181.4707,"region":"Africa"},{"iso":"CRI","name":"Costa Rica","dtp3":99,"gdp":26973.436,"region":"North America"},{"iso":"CIV","name":"Cote d'Ivoire","dtp3":77,"gdp":6747.038,"region":"Africa"},{"iso":"HRV","name":"Croatia","dtp3":92,"gdp":42829.2,"region":"Europe"},{"iso":"CYP","name":"Cyprus","dtp3":94,"gdp":52635.582,"region":"Europe"},{"iso":"CZE","name":"Czechia","dtp3":86,"gdp":47963.9,"region":"Europe"},{"iso":"COD","name":"Democratic Republic of Congo","dtp3":65,"gdp":1602.075,"region":"Africa"},{"iso":"DNK","name":"Denmark","dtp3":96,"gdp":71431.29,"region":"Europe"},{"iso":"DJI","name":"Djibouti","dtp3":77,"gdp":6871.1245,"region":"Africa"},{"iso":"DMA","name":"Dominica","dtp3":90,"gdp":18739.363,"region":"North America"},{"iso":"DOM","name":"Dominican Republic","dtp3":87,"gdp":24229.889,"region":"North America"},{"iso":"TLS","name":"East Timor","dtp3":83,"gdp":3890.9575,"region":"Asia"},{"iso":"ECU","name":"Ecuador","dtp3":70,"gdp":13935.539,"region":"South America"},{"iso":"EGY","name":"Egypt","dtp3":97,"gdp":16798.152,"region":"Africa"},{"iso":"SLV","name":"El Salvador","dtp3":95,"gdp":11669.082,"region":"North America"},{"iso":"GNQ","name":"Equatorial Guinea","dtp3":68,"gdp":15454.429,"region":"Africa"},{"iso":"EST","name":"Estonia","dtp3":81,"gdp":41189.668,"region":"Europe"},{"iso":"SWZ","name":"Eswatini","dtp3":84,"gdp":10380.396,"region":"Africa"},{"iso":"ETH","name":"Ethiopia","dtp3":73,"gdp":2892.2222,"region":"Africa"},{"iso":"FJI","name":"Fiji","dtp3":94,"gdp":13592.464,"region":"Oceania"},{"iso":"FIN","name":"Finland","dtp3":91,"gdp":56123.15,"region":"Europe"},{"iso":"FRA","name":"France","dtp3":96,"gdp":54799.348,"region":"Europe"},{"iso":"GAB","name":"Gabon","dtp3":61,"gdp":18923.662,"region":"Africa"},{"iso":"GMB","name":"Gambia","dtp3":80,"gdp":3057.684,"region":"Africa"},{"iso":"GEO","name":"Georgia","dtp3":86,"gdp":24883.908,"region":"Asia"},{"iso":"DEU","name":"Germany","dtp3":89,"gdp":62554.555,"region":"Europe"},{"iso":"GHA","name":"Ghana","dtp3":95,"gdp":7055.625,"region":"Africa"},{"iso":"GRC","name":"Greece","dtp3":95,"gdp":37474.28,"region":"Europe"},{"iso":"GRD","name":"Grenada","dtp3":93,"gdp":17751.51,"region":"North America"},{"iso":"GTM","name":"Guatemala","dtp3":81,"gdp":12640.888,"region":"North America"},{"iso":"GIN","name":"Guinea","dtp3":63,"gdp":4016.3418,"region":"Africa"},{"iso":"GNB","name":"Guinea-Bissau","dtp3":68,"gdp":2744.2798,"region":"Africa"},{"iso":"GUY","name":"Guyana","dtp3":98,"gdp":70516.72,"region":"South America"},{"iso":"HTI","name":"Haiti","dtp3":60,"gdp":2809.6453,"region":"North America"},{"iso":"HND","name":"Honduras","dtp3":75,"gdp":6585.8555,"region":"North America"},{"iso":"HUN","name":"Hungary","dtp3":99,"gdp":40686.934,"region":"Europe"},{"iso":"ISL","name":"Iceland","dtp3":94,"gdp":67310.055,"region":"Europe"},{"iso":"IND","name":"India","dtp3":94,"gdp":9818.043,"region":"Asia"},{"iso":"IDN","name":"Indonesia","dtp3":78,"gdp":14470.4375,"region":"Asia"},{"iso":"IRN","name":"Iran","dtp3":98,"gdp":17484.133,"region":"Asia"},{"iso":"IRQ","name":"Iraq","dtp3":90,"gdp":12725.043,"region":"Asia"},{"iso":"IRL","name":"Ireland","dtp3":92,"gdp":119037.734,"region":"Europe"},{"iso":"ISR","name":"Israel","dtp3":98,"gdp":47338.844,"region":"Asia"},{"iso":"ITA","name":"Italy","dtp3":94,"gdp":53265.004,"region":"Europe"},{"iso":"JAM","name":"Jamaica","dtp3":99,"gdp":11340.264,"region":"North America"},{"iso":"JPN","name":"Japan","dtp3":99,"gdp":46106.92,"region":"Asia"},{"iso":"JOR","name":"Jordan","dtp3":96,"gdp":9520.251,"region":"Asia"},{"iso":"KAZ","name":"Kazakhstan","dtp3":98,"gdp":35973.965,"region":"Asia"},{"iso":"KEN","name":"Kenya","dtp3":91,"gdp":5845.201,"region":"Africa"},{"iso":"KIR","name":"Kiribati","dtp3":94,"gdp":3257.1362,"region":"Oceania"},{"iso":"KWT","name":"Kuwait","dtp3":99,"gdp":46137.47,"region":"Asia"},{"iso":"KGZ","name":"Kyrgyzstan","dtp3":85,"gdp":7048.9897,"region":"Asia"},{"iso":"LAO","name":"Laos","dtp3":67,"gdp":8600.324,"region":"Asia"},{"iso":"LVA","name":"Latvia","dtp3":97,"gdp":37611.67,"region":"Europe"},{"iso":"LSO","name":"Lesotho","dtp3":86,"gdp":2640.2854,"region":"Africa"},{"iso":"LBR","name":"Liberia","dtp3":83,"gdp":1646.0586,"region":"Africa"},{"iso":"LBY","name":"Libya","dtp3":86,"gdp":12583.834,"region":"Africa"},{"iso":"LTU","name":"Lithuania","dtp3":89,"gdp":47165.367,"region":"Europe"},{"iso":"LUX","name":"Luxembourg","dtp3":99,"gdp":128475.28,"region":"Europe"},{"iso":"MDG","name":"Madagascar","dtp3":60,"gdp":1657.0497,"region":"Africa"},{"iso":"MWI","name":"Malawi","dtp3":91,"gdp":1634.2466,"region":"Africa"},{"iso":"MYS","name":"Malaysia","dtp3":93,"gdp":34116.23,"region":"Asia"},{"iso":"MDV","name":"Maldives","dtp3":99,"gdp":23034.41,"region":"Asia"},{"iso":"MLI","name":"Mali","dtp3":82,"gdp":2916.1853,"region":"Africa"},{"iso":"MLT","name":"Malta","dtp3":97,"gdp":62700.496,"region":"Europe"},{"iso":"MHL","name":"Marshall Islands","dtp3":85,"gdp":7209.2666,"region":"Oceania"},{"iso":"MRT","name":"Mauritania","dtp3":86,"gdp":6482.69,"region":"Africa"},{"iso":"MUS","name":"Mauritius","dtp3":93,"gdp":28011.158,"region":"Africa"},{"iso":"MEX","name":"Mexico","dtp3":78,"gdp":22039.629,"region":"North America"},{"iso":"FSM","name":"Micronesia (country)","dtp3":76,"gdp":3824.1523,"region":"Oceania"},{"iso":"MDA","name":"Moldova","dtp3":86,"gdp":16376.611,"region":"Europe"},{"iso":"MNG","name":"Mongolia","dtp3":96,"gdp":16842.65,"region":"Asia"},{"iso":"MNE","name":"Montenegro","dtp3":81,"gdp":28105.709,"region":"Europe"},{"iso":"MAR","name":"Morocco","dtp3":96,"gdp":9162.747,"region":"Africa"},{"iso":"MOZ","name":"Mozambique","dtp3":70,"gdp":1500.3143,"region":"Africa"},{"iso":"MMR","name":"Myanmar","dtp3":71,"gdp":5276.2944,"region":"Asia"},{"iso":"NAM","name":"Namibia","dtp3":74,"gdp":10281.336,"region":"Africa"},{"iso":"NRU","name":"Nauru","dtp3":99,"gdp":12468.762,"region":"Oceania"},{"iso":"NPL","name":"Nepal","dtp3":97,"gdp":5046.816,"region":"Asia"},{"iso":"NLD","name":"Netherlands","dtp3":91,"gdp":70498.88,"region":"Europe"},{"iso":"NZL","name":"New Zealand","dtp3":89,"gdp":49316.4,"region":"Oceania"},{"iso":"NER","name":"Niger","dtp3":86,"gdp":1803.4369,"region":"Africa"},{"iso":"NGA","name":"Nigeria","dtp3":67,"gdp":7994.216,"region":"Africa"},{"iso":"MKD","name":"North Macedonia","dtp3":89,"gdp":24203.285,"region":"Europe"},{"iso":"NOR","name":"Norway","dtp3":97,"gdp":91105.25,"region":"Europe"},{"iso":"OMN","name":"Oman","dtp3":99,"gdp":36721.082,"region":"Asia"},{"iso":"PAK","name":"Pakistan","dtp3":87,"gdp":5500.3237,"region":"Asia"},{"iso":"PSE","name":"Palestine","dtp3":88,"gdp":3845.503,"region":"Asia"},{"iso":"PAN","name":"Panama","dtp3":72,"gdp":36394.918,"region":"North America"},{"iso":"PNG","name":"Papua New Guinea","dtp3":42,"gdp":4288.5283,"region":"Oceania"},{"iso":"PRY","name":"Paraguay","dtp3":80,"gdp":16296.283,"region":"South America"},{"iso":"PER","name":"Peru","dtp3":80,"gdp":15661.75,"region":"South America"},{"iso":"PHL","name":"Philippines","dtp3":71,"gdp":10375.94,"region":"Asia"},{"iso":"POL","name":"Poland","dtp3":94,"gdp":45153.043,"region":"Europe"},{"iso":"PRT","name":"Portugal","dtp3":99,"gdp":42197.203,"region":"Europe"},{"iso":"QAT","name":"Qatar","dtp3":96,"gdp":110889.79,"region":"Asia"},{"iso":"ROU","name":"Romania","dtp3":79,"gdp":40504,"region":"Europe"},{"iso":"RUS","name":"Russia","dtp3":97,"gdp":41704.71,"region":"Europe"},{"iso":"RWA","name":"Rwanda","dtp3":98,"gdp":3264.6445,"region":"Africa"},{"iso":"KNA","name":"Saint Kitts and Nevis","dtp3":97,"gdp":30656.441,"region":"North America"},{"iso":"LCA","name":"Saint Lucia","dtp3":99,"gdp":24252.469,"region":"North America"},{"iso":"VCT","name":"Saint Vincent and the Grenadines","dtp3":99,"gdp":18714.2,"region":"North America"},{"iso":"WSM","name":"Samoa","dtp3":85,"gdp":7686.2495,"region":"Oceania"},{"iso":"STP","name":"Sao Tome and Principe","dtp3":87,"gdp":5491.2983,"region":"Africa"},{"iso":"SAU","name":"Saudi Arabia","dtp3":97,"gdp":62792.773,"region":"Asia"},{"iso":"SEN","name":"Senegal","dtp3":91,"gdp":4460.924,"region":"Africa"},{"iso":"SRB","name":"Serbia","dtp3":95,"gdp":26900.854,"region":"Europe"},{"iso":"SYC","name":"Seychelles","dtp3":94,"gdp":29241.775,"region":"Africa"},{"iso":"SLE","name":"Sierra Leone","dtp3":91,"gdp":3098.763,"region":"Africa"},{"iso":"SGP","name":"Singapore","dtp3":97,"gdp":132569.53,"region":"Asia"},{"iso":"SVK","name":"Slovakia","dtp3":96,"gdp":40319.055,"region":"Europe"},{"iso":"SVN","name":"Slovenia","dtp3":90,"gdp":48648.906,"region":"Europe"},{"iso":"SLB","name":"Solomon Islands","dtp3":87,"gdp":2353.248,"region":"Oceania"},{"iso":"SOM","name":"Somalia","dtp3":70,"gdp":1409.335,"region":"Africa"},{"iso":"ZAF","name":"South Africa","dtp3":74,"gdp":13597.654,"region":"Africa"},{"iso":"KOR","name":"South Korea","dtp3":97,"gdp":55070.938,"region":"Asia"},{"iso":"ESP","name":"Spain","dtp3":94,"gdp":48460.293,"region":"Europe"},{"iso":"LKA","name":"Sri Lanka","dtp3":97,"gdp":13752.837,"region":"Asia"},{"iso":"SDN","name":"Sudan","dtp3":39,"gdp":1861.398,"region":"Africa"},{"iso":"SUR","name":"Suriname","dtp3":69,"gdp":19179.102,"region":"South America"},{"iso":"SWE","name":"Sweden","dtp3":96,"gdp":62978.938,"region":"Europe"},{"iso":"CHE","name":"Switzerland","dtp3":96,"gdp":82286.18,"region":"Europe"},{"iso":"TJK","name":"Tajikistan","dtp3":97,"gdp":4755.933,"region":"Asia"},{"iso":"TZA","name":"Tanzania","dtp3":83,"gdp":3713.263,"region":"Africa"},{"iso":"THA","name":"Thailand","dtp3":92,"gdp":21740.541,"region":"Asia"},{"iso":"TGO","name":"Togo","dtp3":90,"gdp":2960.7754,"region":"Africa"},{"iso":"TTO","name":"Trinidad and Tobago","dtp3":92,"gdp":31960.156,"region":"North America"},{"iso":"TUN","name":"Tunisia","dtp3":97,"gdp":12774.916,"region":"Africa"},{"iso":"TUR","name":"Turkey","dtp3":99,"gdp":36154.492,"region":"Asia"},{"iso":"TKM","name":"Turkmenistan","dtp3":98,"gdp":18662.299,"region":"Asia"},{"iso":"UGA","name":"Uganda","dtp3":91,"gdp":2879.6702,"region":"Africa"},{"iso":"UKR","name":"Ukraine","dtp3":88,"gdp":16319.845,"region":"Europe"},{"iso":"ARE","name":"United Arab Emirates","dtp3":96,"gdp":69701.805,"region":"Asia"},{"iso":"GBR","name":"United Kingdom","dtp3":92,"gdp":52621.18,"region":"Europe"},{"iso":"USA","name":"United States","dtp3":94,"gdp":75489.266,"region":"North America"},{"iso":"URY","name":"Uruguay","dtp3":94,"gdp":32038.773,"region":"South America"},{"iso":"UZB","name":"Uzbekistan","dtp3":90,"gdp":10450.205,"region":"Asia"},{"iso":"VUT","name":"Vanuatu","dtp3":71,"gdp":3172.0476,"region":"Oceania"},{"iso":"VNM","name":"Vietnam","dtp3":97,"gdp":14415.216,"region":"Asia"},{"iso":"ZMB","name":"Zambia","dtp3":91,"gdp":3708.069,"region":"Africa"},{"iso":"ZWE","name":"Zimbabwe","dtp3":91,"gdp":5215.253,"region":"Africa"}];
+const isoNumToIso3 = {"4":"AFG","8":"ALB","12":"DZA","16":"ASM","20":"AND","24":"AGO","660":"AIA","10":"ATA","28":"ATG","32":"ARG","51":"ARM","533":"ABW","36":"AUS","40":"AUT","31":"AZE","44":"BHS","48":"BHR","50":"BGD","52":"BRB","112":"BLR","56":"BEL","84":"BLZ","204":"BEN","60":"BMU","64":"BTN","68":"BOL","70":"BIH","72":"BWA","74":"BVT","76":"BRA","86":"IOT","92":"VGB","96":"BRN","100":"BGR","854":"BFA","108":"BDI","116":"KHM","120":"CMR","124":"CAN","132":"CPV","535":"BES","136":"CYM","140":"CAF","148":"TCD","152":"CHL","156":"CHN","162":"CXR","166":"CCK","170":"COL","174":"COM","178":"COG","180":"COD","184":"COK","188":"CRI","191":"HRV","192":"CUB","531":"CUW","196":"CYP","203":"CZE","384":"CIV","208":"DNK","262":"DJI","212":"DMA","214":"DOM","218":"ECU","818":"EGY","222":"SLV","226":"GNQ","232":"ERI","233":"EST","748":"SWZ","231":"ETH","238":"FLK","234":"FRO","242":"FJI","246":"FIN","250":"FRA","254":"GUF","258":"PYF","260":"ATF","266":"GAB","270":"GMB","268":"GEO","276":"DEU","288":"GHA","292":"GIB","300":"GRC","304":"GRL","308":"GRD","312":"GLP","316":"GUM","320":"GTM","831":"GGY","324":"GIN","624":"GNB","328":"GUY","332":"HTI","334":"HMD","340":"HND","344":"HKG","348":"HUN","352":"ISL","356":"IND","360":"IDN","364":"IRN","368":"IRQ","372":"IRL","833":"IMN","376":"ISR","380":"ITA","388":"JAM","392":"JPN","832":"JEY","400":"JOR","398":"KAZ","404":"KEN","296":"KIR","414":"KWT","417":"KGZ","418":"LAO","428":"LVA","422":"LBN","426":"LSO","430":"LBR","434":"LBY","438":"LIE","440":"LTU","442":"LUX","446":"MAC","450":"MDG","454":"MWI","458":"MYS","462":"MDV","466":"MLI","470":"MLT","584":"MHL","474":"MTQ","478":"MRT","480":"MUS","175":"MYT","484":"MEX","583":"FSM","498":"MDA","492":"MCO","496":"MNG","499":"MNE","500":"MSR","504":"MAR","508":"MOZ","104":"MMR","516":"NAM","520":"NRU","524":"NPL","528":"NLD","540":"NCL","554":"NZL","558":"NIC","562":"NER","566":"NGA","570":"NIU","574":"NFK","408":"PRK","807":"MKD","580":"MNP","578":"NOR","512":"OMN","586":"PAK","585":"PLW","275":"PSE","591":"PAN","598":"PNG","600":"PRY","604":"PER","608":"PHL","612":"PCN","616":"POL","620":"PRT","630":"PRI","634":"QAT","642":"ROU","643":"RUS","646":"RWA","638":"REU","663":"MAF","882":"WSM","674":"SMR","682":"SAU","686":"SEN","688":"SRB","690":"SYC","694":"SLE","702":"SGP","534":"SXM","703":"SVK","705":"SVN","90":"SLB","706":"SOM","710":"ZAF","239":"SGS","410":"KOR","728":"SSD","724":"ESP","144":"LKA","652":"BLM","654":"SHN","659":"KNA","662":"LCA","666":"SPM","670":"VCT","729":"SDN","740":"SUR","744":"SJM","752":"SWE","756":"CHE","760":"SYR","678":"STP","158":"TWN","762":"TJK","834":"TZA","764":"THA","626":"TLS","768":"TGO","772":"TKL","776":"TON","780":"TTO","788":"TUN","792":"TUR","795":"TKM","796":"TCA","798":"TUV","850":"VIR","800":"UGA","804":"UKR","784":"ARE","826":"GBR","840":"USA","581":"UMI","858":"URY","860":"UZB","548":"VUT","336":"VAT","862":"VEN","704":"VNM","876":"WLF","732":"ESH","887":"YEM","894":"ZMB","716":"ZWE","248":"ALA"};
+
+// ─── COLORS / CONSTANTS ─────────────────────────────────────────────────────
+const vaccineColors = {
+  'DTP3':      '#3b82f6',
+  'Polio':     '#22c55e',
+  'Measles':   '#f97316',
+  'Rubella':   '#a855f7',
+  'HepB':      '#06b6d4',
+  'Hib':       '#84cc16',
+  'PCV':       '#ef4444',
+  'Rotavirus': '#ec4899',
+  'IPV':       '#eab308',
+};
+const vaccineList = Object.keys(vaccineColors);
+
+// vaccine column in worldData (legacy names from vaccination-visualization)
+const worldCol = {
+  'DTP3':'DTP3', 'Polio':'Polio', 'Measles':'Measles',
+  'Rubella':'Rubella', 'HepB':'Hep B', 'Hib':'Hib',
+  'PCV':'PCV', 'Rotavirus':'Rotavirus', 'IPV':'IPV',
+};
+
+const regionColors = {
+  'Africa':        '#f97316',
+  'Asia':          '#3b82f6',
+  'Europe':        '#22c55e',
+  'North America': '#eab308',
+  'Oceania':       '#a855f7',
+  'South America': '#06b6d4',
+};
+
+const tooltip = document.getElementById('tooltip');
+function showTooltip(html, event) {
+  tooltip.innerHTML = html;
+  tooltip.style.opacity = 1;
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  let left = event.clientX + 16;
+  let top  = event.clientY - 10;
+  if (left + tw > window.innerWidth - 8)  left = event.clientX - tw - 16;
+  if (top + th > window.innerHeight - 8)  top  = window.innerHeight - th - 8;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top  = top  + 'px';
+}
+function hideTooltip() { tooltip.style.opacity = 0; }
+
+function chartSize(el, defaultH, fallbackW = 1040) {
+  const card = el?.closest('.chart-card');
+  const inner = el?.closest('.section-inner');
+  let W = fallbackW;
+  if (card) {
+    W = card.getBoundingClientRect().width - 48;
+  } else if (inner) {
+    W = inner.getBoundingClientRect().width - 64;
+  }
+  W = Math.floor(Math.max(300, Math.min(W, window.innerWidth - 48)));
+  return { W, H: defaultH };
+}
+
+function makeSvg(containerId, W, H) {
+  return d3.select(containerId).append('svg')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('width', '100%')
+    .attr('height', H)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+}
+
+let chartsBuilt = false;
+function clearCharts() {
+  ['chart1', 'chart2', 'chart3', 'chart4a', 'chart4b'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  ['legend1', 'legend3', 'legend4b'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  const mapSel = document.getElementById('mapVaccine');
+  if (mapSel) mapSel.innerHTML = '';
+  const scatterStats = document.getElementById('scatter-stats');
+  if (scatterStats) scatterStats.textContent = '';
+  chartsBuilt = false;
+}
+
+function buildAllCharts() {
+  if (chartsBuilt) return;
+  chartsBuilt = true;
+  buildChart1();
+  buildChart2();
+  buildChart3();
+  buildChart4a();
+  buildChart4b();
+}
+
+function initCharts() {
+  requestAnimationFrame(() => requestAnimationFrame(buildAllCharts));
+}
+if (document.readyState === 'complete') {
+  initCharts();
+} else {
+  window.addEventListener('load', initCharts, { once: true });
+}
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { clearCharts(); initCharts(); }, 250);
+});
+
+// ─── CHART 1: GLOBAL LINES (ALL 9 VACCINES, NO TOGGLE) ──────────────────────
+function buildChart1() {
+  const container = document.getElementById('chart1');
+  const { W, H } = chartSize(container, 500);
+  const M = {top: 28, right: 24, bottom: 48, left: 58};
+  const iw = W - M.left - M.right;
+  const ih = H - M.top - M.bottom;
+
+  const svg = makeSvg('#chart1', W, H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.insert('rect', ':first-child')
+    .attr('width', iw).attr('height', ih)
+    .attr('fill', 'var(--plot)').attr('rx', 4);
+
+  const x = d3.scaleLinear().domain([1980, 2024]).range([0, iw]);
+  const y = d3.scaleLinear().domain([0, 100]).range([ih, 0]);
+
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(''));
+
+  // COVID band
+  g.append('rect')
+    .attr('x', x(2020)).attr('width', x(2021.5) - x(2020))
+    .attr('y', 0).attr('height', ih)
+    .attr('fill', '#ef444425');
+  g.append('text')
+    .attr('x', (x(2020) + x(2021.5)) / 2).attr('y', 14)
+    .attr('text-anchor', 'middle').attr('fill', '#ef4444')
+    .attr('font-size', 10).text('COVID');
+
+  // WHO 90% dashed red line
+  g.append('line')
+    .attr('x1', 0).attr('x2', iw)
+    .attr('y1', y(90)).attr('y2', y(90))
+    .attr('stroke', '#ef4444').attr('stroke-width', 1.6)
+    .attr('stroke-dasharray', '6,4').attr('opacity', 0.85);
+  g.append('text')
+    .attr('x', iw - 4).attr('y', y(90) - 6)
+    .attr('text-anchor', 'end').attr('fill', '#ef4444')
+    .attr('font-size', 11).text('WHO 90% target');
+
+  // Axes
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${ih})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(8));
+  g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%'));
+
+  // Lines (all 9 vaccines)
+  const line = d3.line().x(d => x(d.year)).y(d => y(d.v))
+    .defined(d => d.v !== null).curve(d3.curveMonotoneX);
+
+  vaccineList.forEach(vac => {
+    const data = worldData.map(d => ({year: d.year, v: d[worldCol[vac]]}))
+      .filter(d => d.v !== null);
+    if (data.length === 0) return;
+    g.append('path').datum(data)
+      .attr('fill', 'none').attr('stroke', vaccineColors[vac])
+      .attr('stroke-width', 2).attr('opacity', 0.92).attr('d', line);
+  });
+
+  // Hover crosshair + tooltip
+  const hoverLine = g.append('line').attr('y1', 0).attr('y2', ih)
+    .attr('stroke', '#ffffff35').attr('stroke-width', 1).attr('opacity', 0);
+  const overlay = g.append('rect')
+    .attr('width', iw).attr('height', ih).attr('fill', 'none').attr('pointer-events', 'all');
+
+  overlay.on('mousemove', function(event) {
+    const [mx] = d3.pointer(event);
+    const yr = Math.round(x.invert(mx));
+    if (yr < 1980 || yr > 2024) { hideTooltip(); hoverLine.attr('opacity', 0); return; }
+    const row = worldData.find(d => d.year === yr);
+    if (!row) return;
+    hoverLine.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+    let html = `<strong>${yr}</strong>`;
+    vaccineList.forEach(v => {
+      const val = row[worldCol[v]];
+      if (val !== null && val !== undefined) {
+        html += `<br><span style="color:${vaccineColors[v]}">${v}: <b style="color:#f5f5f5">${val}%</b></span>`;
+      }
+    });
+    showTooltip(html, event);
+  }).on('mouseleave', () => { hideTooltip(); hoverLine.attr('opacity', 0); });
+
+  // Legend
+  const leg = document.getElementById('legend1');
+  vaccineList.forEach(v => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-swatch" style="background:${vaccineColors[v]}"></div>${v}`;
+    leg.appendChild(item);
+  });
+}
+
+// ─── CHART 2: WORLD MAP CHOROPLETH (FIXED 2024, VACCINE DROPDOWN) ──────────
+function buildChart2() {
+  const container = document.getElementById('chart2');
+  let { W, H } = chartSize(container, 520);
+  const M = {top: 12, right: 12, bottom: 52, left: 12};
+
+  // Populate dropdown (once)
+  const sel = document.getElementById('mapVaccine');
+  if (!sel.options.length) {
+    vaccineList.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      sel.appendChild(opt);
+    });
+  }
+  sel.value = 'DTP3';
+
+  const projection = d3.geoNaturalEarth1();
+  const path = d3.geoPath().projection(projection);
+
+  const byIso = new Map(country2024.map(d => [d.iso, d]));
+  let currentVaccine = 'DTP3';
+  const color = d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
+
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world => {
+    ({ W, H } = chartSize(container, 520));
+    d3.select('#chart2').selectAll('*').remove();
+    const svg = makeSvg('#chart2', W, H);
+    const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+    const iw = W - M.left - M.right;
+    const ih = H - M.top - M.bottom;
+    const countries = topojson.feature(world, world.objects.countries);
+    const filtered = {type:'FeatureCollection', features: countries.features.filter(f => f.properties.name !== 'Antarctica')};
+    projection.fitSize([iw, ih], filtered);
+
+    // Attach iso3 to each feature
+    filtered.features.forEach(f => {
+      f.iso3 = isoNumToIso3[String(f.id)] || null;
+    });
+
+    const paths = g.selectAll('path.country').data(filtered.features).enter()
+      .append('path').attr('class', 'country').attr('d', path);
+
+    paths.on('mousemove', function(event, d) {
+      const row = d.iso3 ? byIso.get(d.iso3) : null;
+      const val = row ? row[currentVaccine] : null;
+      const valStr = (val === null || val === undefined)
+        ? '<span style="color:#7d8590">no data</span>'
+        : `<b style="color:#f5f5f5">${val}%</b>`;
+      showTooltip(`<strong>${d.properties.name}</strong><span>${currentVaccine}: </span>${valStr}`, event);
+    }).on('mouseleave', hideTooltip);
+
+    function paint() {
+      paths.attr('fill', d => {
+        const row = d.iso3 ? byIso.get(d.iso3) : null;
+        const v = row ? row[currentVaccine] : null;
+        return (v === null || v === undefined) ? 'var(--map-nodata)' : color(v);
+      });
+    }
+    paint();
+
+    sel.addEventListener('change', () => { currentVaccine = sel.value; paint(); });
+
+    // Legend (colour ramp)
+    const lg = svg.append('g').attr('class', 'map-legend')
+      .attr('transform', `translate(${M.left + 30}, ${H - 30})`);
+    const lw = 240, lh = 8;
+    const defs = svg.append('defs');
+    const gradId = 'mapGrad';
+    const lin = defs.append('linearGradient').attr('id', gradId);
+    d3.range(0, 101, 10).forEach(t => {
+      lin.append('stop').attr('offset', `${t}%`).attr('stop-color', color(t));
+    });
+    lg.append('rect').attr('width', lw).attr('height', lh).attr('rx', 2)
+      .attr('fill', `url(#${gradId})`);
+    [0, 25, 50, 75, 100].forEach(t => {
+      const X = (t/100) * lw;
+      lg.append('line').attr('x1', X).attr('x2', X)
+        .attr('y1', lh).attr('y2', lh + 4).attr('stroke', 'var(--text-muted)');
+      lg.append('text').attr('x', X).attr('y', lh + 16)
+        .attr('text-anchor', 'middle').text(t + '%');
+    });
+    lg.append('text').attr('x', 0).attr('y', -4)
+      .attr('fill', 'var(--text-muted)').attr('font-size', 10)
+      .text('Coverage (%) — grey = no data');
+  }).catch(err => {
+    const { W, H } = chartSize(container, 520);
+    d3.select('#chart2').selectAll('*').remove();
+    const svg = makeSvg('#chart2', W, H);
+    svg.append('text')
+      .attr('x', W / 2).attr('y', H / 2)
+      .attr('text-anchor', 'middle').attr('fill', 'var(--text-muted)')
+      .text('Could not load world map.');
+    console.error(err);
+  });
+}
+
+// ─── CHART 3: GDP vs DTP3 SCATTER (2024 FIXED) ──────────────────────────────
+function buildChart3() {
+  const container = document.getElementById('chart3');
+  const { W, H } = chartSize(container, 640);
+  const M = {top: 24, right: 28, bottom: 58, left: 68};
+  const iw = W - M.left - M.right;
+  const ih = H - M.top - M.bottom;
+
+  const svg = makeSvg('#chart3', W, H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.insert('rect', ':first-child')
+    .attr('width', iw).attr('height', ih)
+    .attr('fill', 'var(--plot)').attr('rx', 4);
+
+  const x = d3.scaleLog().domain([800, 150000]).range([0, iw]);
+  const dtp3vals = scatter2024.map(d => d.dtp3);
+  const yMin = Math.max(0, Math.floor((Math.min(...dtp3vals) - 15) / 5) * 5);
+  const yMax = 100;
+  const y = d3.scaleLinear().domain([yMin, yMax]).range([ih, 0]);
+
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(''));
+
+  // Axes
+  const xAxis = d3.axisBottom(x).tickValues([1000,2000,5000,10000,20000,50000,100000])
+    .tickFormat(d => d >= 1000 ? '$' + (d/1000) + 'K' : '$' + d);
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${ih})`).call(xAxis);
+  g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%'));
+
+  g.append('text').attr('x', iw/2).attr('y', ih + 52)
+    .attr('text-anchor', 'middle').attr('fill', 'var(--text-body)')
+    .attr('font-size', 13).text('GDP per capita (log scale, US$)');
+  g.append('text').attr('transform', `translate(-48,${ih/2}) rotate(-90)`)
+    .attr('text-anchor', 'middle').attr('fill', 'var(--text-body)')
+    .attr('font-size', 13).text('DTP3 coverage (%)');
+
+  // Loess-like smoother (LOWESS approximation via local averaging)
+  function smoother(data, bandwidth=0.30) {
+    const sorted = data.map(d => ({lx: Math.log10(d.gdp), y: d.dtp3})).sort((a,b)=>a.lx-b.lx);
+    const n = sorted.length;
+    const k = Math.max(8, Math.floor(n * bandwidth));
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const lo = Math.max(0, i - k), hi = Math.min(n, i + k);
+      let sum = 0, cnt = 0;
+      for (let j = lo; j < hi; j++) { sum += sorted[j].y; cnt++; }
+      out.push({lx: sorted[i].lx, y: sum / cnt});
+    }
+    return out;
+  }
+  const smooth = smoother(scatter2024);
+  const sline = d3.line().x(d => x(Math.pow(10, d.lx))).y(d => y(d.y)).curve(d3.curveMonotoneX);
+  g.append('path').datum(smooth)
+    .attr('fill', 'none').attr('stroke', '#f5f5f5').attr('stroke-opacity', 0.55)
+    .attr('stroke-width', 1.5).attr('stroke-dasharray', '6,4').attr('d', sline);
+
+  // Correlation (log GDP vs dtp3)
+  function pearson(arr, fx, fy) {
+    const n = arr.length;
+    const mx = d3.mean(arr, fx), my = d3.mean(arr, fy);
+    let num = 0, dx2 = 0, dy2 = 0;
+    arr.forEach(d => {
+      const a = fx(d) - mx, b = fy(d) - my;
+      num += a*b; dx2 += a*a; dy2 += b*b;
+    });
+    return num / Math.sqrt(dx2 * dy2);
+  }
+  const r = pearson(scatter2024, d => Math.log10(d.gdp), d => d.dtp3);
+  const statsEl = document.getElementById('scatter-stats');
+  if (statsEl) {
+    statsEl.textContent = `Pearson r = ${r.toFixed(2)} · n = ${scatter2024.length} countries (log GDP vs. DTP3)`;
+  }
+
+  // Dots
+  const HIGHLIGHTS = new Set(['Rwanda','Sudan','Azerbaijan','Bangladesh','Equatorial Guinea','United States']);
+  g.selectAll('circle.dot').data(scatter2024).enter().append('circle')
+    .attr('class', 'dot')
+    .attr('cx', d => x(d.gdp)).attr('cy', d => y(d.dtp3))
+    .attr('r', d => HIGHLIGHTS.has(d.name) ? 7 : 5)
+    .attr('fill', d => regionColors[d.region] || '#7d8590')
+    .attr('fill-opacity', 0.9)
+    .attr('stroke', d => HIGHLIGHTS.has(d.name) ? '#f5f5f5' : '#0a0a0a')
+    .attr('stroke-width', d => HIGHLIGHTS.has(d.name) ? 1.6 : 0.5)
+    .style('cursor', 'pointer')
+    .on('mousemove', function(event, d) {
+      showTooltip(
+        `<strong>${d.name}</strong>` +
+        `<span>GDP per capita: $${d3.format(',')(Math.round(d.gdp))}</span><br>` +
+        `<span>DTP3: <b style="color:#f5f5f5">${d.dtp3}%</b></span><br>` +
+        `<span style="color:${regionColors[d.region]}">${d.region}</span>`,
+        event
+      );
+      d3.select(this).attr('r', 8).attr('stroke', '#f5f5f5').attr('stroke-width', 1.6);
+    })
+    .on('mouseleave', function(event, d) {
+      hideTooltip();
+      d3.select(this)
+        .attr('r', HIGHLIGHTS.has(d.name) ? 7 : 5)
+        .attr('stroke', HIGHLIGHTS.has(d.name) ? '#f5f5f5' : '#0a0a0a')
+        .attr('stroke-width', HIGHLIGHTS.has(d.name) ? 1.6 : 0.5);
+    });
+
+  // Highlight labels (key outliers only)
+  const labelOffsets = {
+    'Rwanda': [10, -8], 'Sudan': [10, 5], 'Azerbaijan': [10, 4],
+    'Bangladesh': [10, -6], 'Equatorial Guinea': [10, 4], 'United States': [10, -6],
+  };
+  g.selectAll('text.hl').data(scatter2024.filter(d => HIGHLIGHTS.has(d.name))).enter()
+    .append('text').attr('class', 'hl')
+    .attr('x', d => x(d.gdp) + (labelOffsets[d.name]?.[0] || 10))
+    .attr('y', d => y(d.dtp3) + (labelOffsets[d.name]?.[1] || 4))
+    .attr('fill', '#f5f5f5').attr('font-size', 12).attr('font-weight', 600)
+    .text(d => d.name);
+
+  // Legend
+  const leg = document.getElementById('legend3');
+  Object.entries(regionColors).forEach(([region, c]) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-dot" style="background:${c}"></div>${region}`;
+    leg.appendChild(item);
+  });
+}
+
+// ─── CHART 4A: BIGGEST COVID DROPS BAR CHART ────────────────────────────────
+function buildChart4a() {
+  const container = document.getElementById('chart4a');
+  const { W, H } = chartSize(container, 440);
+  const M = {top: 10, right: 30, bottom: 28, left: 120};
+  const iw = W - M.left - M.right;
+  const ih = H - M.top - M.bottom;
+
+  const top12 = covidData.slice(0, 12);
+
+  const svg = makeSvg('#chart4a', W, H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(top12, d => d.drop) + 3]).range([0, iw]);
+  const y = d3.scaleBand()
+    .domain(top12.map(d => d.entity)).range([0, ih]).padding(0.28);
+
+  g.append('g').attr('class', 'axis').call(d3.axisLeft(y));
+
+  // X axis bottom
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${ih})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d => '-' + d + 'pp'));
+
+  // Bars
+  g.selectAll('rect.bar').data(top12).enter().append('rect')
+    .attr('class', 'bar')
+    .attr('x', 0).attr('y', d => y(d.entity))
+    .attr('width', d => x(d.drop)).attr('height', y.bandwidth())
+    .attr('rx', 3).attr('fill', '#f97316').attr('fill-opacity', 0.9)
+    .on('mousemove', function(event, d) {
+      showTooltip(
+        `<strong>${d.entity}</strong>` +
+        `<span>Pre-COVID (2015–19): ${d.pre}%</span><br>` +
+        `<span>During COVID (2020–23): ${d.post}%</span><br>` +
+        `<span style="color:#f97316">Drop: −${d.drop} percentage points</span>`,
+        event
+      );
+      d3.select(this).attr('fill-opacity', 1);
+    })
+    .on('mouseleave', function() {
+      hideTooltip();
+      d3.select(this).attr('fill-opacity', 0.9);
+    });
+
+  // Drop labels
+  g.selectAll('text.bar-lbl').data(top12).enter().append('text')
+    .attr('class', 'bar-lbl')
+    .attr('x', d => x(d.drop) + 6)
+    .attr('y', d => y(d.entity) + y.bandwidth()/2 + 4)
+    .attr('fill', '#ef4444').attr('font-size', 11).attr('font-weight', 600)
+    .text(d => `−${d.drop}pp`);
+}
+
+// ─── CHART 4B: ZOOMED 2010-2024 FOUR CORE VACCINES ──────────────────────────
+function buildChart4b() {
+  const container = document.getElementById('chart4b');
+  const { W, H } = chartSize(container, 440);
+  const M = {top: 28, right: 24, bottom: 48, left: 54};
+  const iw = W - M.left - M.right;
+  const ih = H - M.top - M.bottom;
+
+  const coreVaccines = ['DTP3', 'Polio', 'Measles', 'HepB'];
+  const recent = worldData.filter(d => d.year >= 2010);
+  const yVals = [];
+  recent.forEach(d => coreVaccines.forEach(v => {
+    const n = d[worldCol[v]];
+    if (n != null) yVals.push(n);
+  }));
+  const yLo = Math.floor((Math.min(...yVals) - 4) / 5) * 5;
+  const yHi = Math.ceil((Math.max(...yVals) + 4) / 5) * 5;
+
+  const svg = makeSvg('#chart4b', W, H);
+  const g = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+  g.insert('rect', ':first-child')
+    .attr('width', iw).attr('height', ih)
+    .attr('fill', 'var(--plot)').attr('rx', 4);
+
+  const x = d3.scaleLinear().domain([2010, 2024]).range([0, iw]);
+  const y = d3.scaleLinear().domain([yLo, Math.max(yHi, 92)]).range([ih, 0]);
+
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-iw).tickFormat(''));
+
+  // COVID disruption band
+  g.append('rect')
+    .attr('x', x(2020)).attr('width', x(2021.5) - x(2020))
+    .attr('y', 0).attr('height', ih)
+    .attr('fill', '#ef444430');
+  g.append('text').attr('x', (x(2020) + x(2021.5)) / 2).attr('y', 14)
+    .attr('text-anchor', 'middle').attr('fill', '#ef4444')
+    .attr('font-size', 10).text('COVID');
+
+  // WHO line
+  g.append('line')
+    .attr('x1', 0).attr('x2', iw)
+    .attr('y1', y(90)).attr('y2', y(90))
+    .attr('stroke', '#ef4444').attr('stroke-width', 1.4)
+    .attr('stroke-dasharray', '6,4').attr('opacity', 0.65);
+
+  g.append('g').attr('class', 'axis')
+    .attr('transform', `translate(0,${ih})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(7));
+  g.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + '%'));
+
+  const line = d3.line().x(d => x(d.year)).y(d => y(d.v))
+    .defined(d => d.v !== null).curve(d3.curveMonotoneX);
+
+  coreVaccines.forEach(vac => {
+    const data = recent.map(d => ({year: d.year, v: d[worldCol[vac]]}))
+      .filter(d => d.v !== null);
+    g.append('path').datum(data)
+      .attr('fill', 'none').attr('stroke', vaccineColors[vac])
+      .attr('stroke-width', 2.2).attr('opacity', 0.95).attr('d', line);
+    g.selectAll(`circle.dot-${vac}`).data(data).enter().append('circle')
+      .attr('cx', d => x(d.year)).attr('cy', d => y(d.v))
+      .attr('r', 2.4).attr('fill', vaccineColors[vac]);
+  });
+
+  const leg4 = document.getElementById('legend4b');
+  if (leg4) {
+    coreVaccines.forEach(v => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `<div class="legend-swatch" style="background:${vaccineColors[v]}"></div>${v}`;
+      leg4.appendChild(item);
+    });
+  }
+
+  // Hover
+  const hoverLine = g.append('line').attr('y1', 0).attr('y2', ih)
+    .attr('stroke', '#ffffff35').attr('stroke-width', 1).attr('opacity', 0);
+  const overlay = g.append('rect').attr('width', iw).attr('height', ih)
+    .attr('fill', 'none').attr('pointer-events', 'all');
+  overlay.on('mousemove', function(event) {
+    const [mx] = d3.pointer(event);
+    const yr = Math.round(x.invert(mx));
+    if (yr < 2010 || yr > 2024) { hideTooltip(); hoverLine.attr('opacity', 0); return; }
+    const row = worldData.find(d => d.year === yr);
+    if (!row) return;
+    hoverLine.attr('x1', x(yr)).attr('x2', x(yr)).attr('opacity', 1);
+    let html = `<strong>${yr}</strong>`;
+    coreVaccines.forEach(v => {
+      const val = row[worldCol[v]];
+      if (val !== null && val !== undefined)
+        html += `<br><span style="color:${vaccineColors[v]}">${v}: <b style="color:#f5f5f5">${val}%</b></span>`;
+    });
+    showTooltip(html, event);
+  }).on('mouseleave', () => { hideTooltip(); hoverLine.attr('opacity', 0); });
+}
+
+// ─── STICKY NAV HIGHLIGHTING ────────────────────────────────────────────────
+const sections = ['level1','level2','level3','level4'];
+const navLinks = ['nav1','nav2','nav3','nav4'];
+const dotColors = ['var(--accent)','var(--accent2)','var(--accent4)','var(--accent3)'];
+window.addEventListener('scroll', () => {
+  let current = 0;
+  sections.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 100) current = i;
+  });
+  navLinks.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === current);
+  });
+  document.getElementById('navDot').style.background = dotColors[current];
+});
+</script>
+</body>
+</html>
+

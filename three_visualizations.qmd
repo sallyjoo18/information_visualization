@@ -1,0 +1,239 @@
+---
+title: "Three Visualizations of Global Vaccination Coverage"
+format:
+  html:
+    fig-width: 9
+    fig-height: 6
+    toc: true
+author: "Team 15"
+---
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+#| echo: false
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(viridis)
+library(maps)
+library(countrycode)
+
+vaccine <- read.csv(
+  "global-vaccination-coverage.csv",
+  sep = ",",
+  check.names = FALSE,
+  na.strings = c("", "NA")
+)
+
+vaccine_cols <- c(
+  "Hepatitis B (HepB3)",
+  "H. influenza type b (Hib3)",
+  "Inactivated polio vaccine (IPV1)",
+  "Measles, first dose (MCV1)",
+  "Pneumococcal vaccine (PCV3)",
+  "Polio (Pol3)",
+  "Rubella (RCV1)",
+  "Rotavirus (RotaC)",
+  "Diptheria/tetanus/pertussis (DTP3)"
+)
+
+countries  <- vaccine |> filter(!is.na(Code) & Code != "")
+groupings  <- vaccine |> filter(is.na(Code) | Code == "")
+```
+
+# 1. Choropleth Map — DTP3 Coverage by Country (2024)
+
+A world map showing the share of one-year-olds who received three doses of the
+diphtheria-tetanus-pertussis vaccine in 2024. DTP3 is widely used as a proxy
+for the overall health of a country's routine-immunization program, and it is
+the most completely reported vaccine in the dataset.
+
+```{r}
+#| label: choropleth
+#| message: false
+#| warning: false
+#| echo: false
+#| fig-cap: "DTP3 coverage among one-year-olds, 2024. Grey = no data."
+
+dtp_2024 <- countries |>
+  filter(Year == 2024) |>
+  transmute(iso3 = Code,
+            dtp3 = `Diptheria/tetanus/pertussis (DTP3)`)
+
+world_map <- map_data("world")
+world_map$iso3 <- countrycode(
+  world_map$region,
+  origin = "country.name",
+  destination = "iso3c",
+  warn = FALSE
+)
+
+map_df <- left_join(world_map, dtp_2024, by = "iso3")
+
+ggplot(map_df, aes(long, lat, group = group, fill = dtp3)) +
+  geom_polygon(color = "white", linewidth = 0.05) +
+  coord_fixed(1.3, xlim = c(-170, 180), ylim = c(-58, 85)) +
+  scale_fill_viridis_c(
+    option = "viridis",
+    name = "DTP3 coverage (%)",
+    limits = c(0, 100),
+    na.value = "grey88",
+    breaks = c(0, 25, 50, 75, 100)
+  ) +
+  labs(
+    title = "Global DTP3 vaccination coverage, 2024",
+    subtitle = "Share of one-year-olds who received three doses of DTP",
+    caption  = "Source: WHO / UNICEF via Our World in Data"
+  ) +
+  theme_void(base_size = 11) +
+  theme(
+    plot.title    = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "grey30"),
+    legend.position = "bottom",
+    legend.key.width  = unit(2.2, "cm"),
+    legend.key.height = unit(0.35, "cm")
+  )
+```
+
+**Reading the map.** Most of Europe, the Americas, and East Asia sit at the top
+of the scale (~95%+). Persistent low-coverage clusters appear in the Sahel,
+parts of the Horn of Africa, and a few conflict-affected states. Greyed-out
+regions are countries with no reported value for 2024 (per the documentation,
+the most recent two years are partly WHO-estimated).
+
+---
+
+# 2. Multi-Line Time Series — Coverage Trajectories by Region, 1980–2024
+
+How has coverage changed over 45 years? Here we use the grouping rows in the
+dataset (the six UNICEF regions plus the global `World` series) and plot each
+vaccine as its own small multiple. NA values are left as gaps rather than
+zero, because for newer vaccines a blank cell means "not yet in the routine
+schedule," not "0% coverage."
+
+```{r}
+#| label: timeseries
+#| message: false
+#| warning: false
+#| echo: false
+#| fig-width: 11
+#| fig-height: 7
+#| fig-cap: "Coverage over time for each vaccine, by UNICEF region and globally."
+
+region_long <- groupings |>
+  filter(Entity != "Middle-income countries") |>
+  pivot_longer(
+    cols = all_of(vaccine_cols),
+    names_to  = "vaccine",
+    values_to = "coverage"
+  ) |>
+  mutate(
+    Entity = gsub(" \\(UNICEF\\)", "", Entity),
+    vaccine = factor(vaccine, levels = vaccine_cols)
+  )
+
+ggplot(region_long, aes(Year, coverage, color = Entity)) +
+  geom_line(linewidth = 0.8, na.rm = TRUE) +
+  facet_wrap(~ vaccine, ncol = 3) +
+  scale_y_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100)) +
+  scale_x_continuous(breaks = c(1980, 2000, 2020)) +
+  scale_color_brewer(palette = "Dark2", name = NULL) +
+  labs(
+    title = "Vaccination coverage over time, by region",
+    subtitle = "Share of one-year-olds vaccinated, 1980–2024",
+    x = NULL, y = "Coverage (%)",
+    caption  = "Source: WHO / UNICEF via Our World in Data"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title      = element_text(face = "bold"),
+    plot.subtitle   = element_text(color = "grey30"),
+    strip.text      = element_text(face = "bold", size = 9),
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+```
+
+**Reading the chart.** A few stories jump out:
+
+- The classic 1980s ramp-up is visible for **DTP3**, **Polio**, **Measles
+  (MCV1)**, and **Rubella** — these are the vaccines whose facets stretch all
+  the way back to 1980.
+- **PCV3**, **Rotavirus**, and **IPV1** appear only in recent years because
+  they were added to the routine schedule later (2008, 2006, and 2015
+  respectively).
+- The visible 2020–2021 dip across nearly every panel is the COVID-19
+  pandemic's effect on routine immunization services.
+- **West and Central Africa** and **Eastern and Southern Africa** consistently
+  trail the other regions; **East Asia and the Pacific** and **Latin America**
+  sit near the global average or above.
+
+---
+
+# 3. Correlation Heatmap — How Co-Administered Are the Nine Vaccines?
+
+Pairwise Pearson correlations between the nine vaccine columns, computed
+across all country-year observations and reordered by hierarchical clustering
+so that similar vaccines sit next to each other.
+
+```{r}
+#| label: correlation
+#| message: false
+#| warning: false
+#| echo: false
+#| fig-width: 8
+#| fig-height: 7
+#| fig-cap: "Pairwise Pearson correlation between vaccines (country-year level)."
+
+cor_mat <- countries |>
+  select(all_of(vaccine_cols)) |>
+  cor(use = "pairwise.complete.obs")
+
+ord <- hclust(as.dist(1 - cor_mat))$order
+cor_mat <- cor_mat[ord, ord]
+
+cor_df <- as.data.frame(as.table(cor_mat)) |>
+  rename(vaccine_x = Var1, vaccine_y = Var2, r = Freq)
+
+ggplot(cor_df, aes(vaccine_x, vaccine_y, fill = r)) +
+  geom_tile(color = "white", linewidth = 0.6) +
+  geom_text(aes(label = sprintf("%.2f", r)),
+            color = "grey15", size = 3.4) +
+  scale_fill_gradient2(
+    low = "#B2182B", mid = "white", high = "#2166AC",
+    midpoint = 0, limits = c(-1, 1),
+    name = "Pearson r"
+  ) +
+  coord_fixed() +
+  labs(
+    title = "How correlated are vaccine coverage rates?",
+    subtitle = "Across all country-year observations, clustered ordering",
+    x = NULL, y = NULL,
+    caption  = "Source: WHO / UNICEF via Our World in Data"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    plot.title    = element_text(face = "bold"),
+    plot.subtitle = element_text(color = "grey30"),
+    axis.text.x   = element_text(angle = 35, hjust = 1),
+    panel.grid    = element_blank(),
+    legend.position = "right"
+  )
+```
+
+**Reading the heatmap.** Clustering pulls out two clear groups:
+
+- A tight **"legacy bundle"** of DTP3, Polio, HepB, and Measles, all correlated
+  at $r > 0.85$. These vaccines have shared delivery infrastructure for
+  decades, so countries that do well on one almost always do well on the
+  others.
+- A looser cluster of the **newer vaccines** — PCV3, Rotavirus, and IPV1 —
+  which correlate strongly with each other (they were rolled out into the same
+  countries around the same time) but slightly less strongly with the legacy
+  bundle.
+- **Rubella (RCV1)** sits between the two, which fits the fact that it is
+  typically delivered as the combined measles–rubella vaccine.
