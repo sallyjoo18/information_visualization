@@ -6,10 +6,43 @@ CS333 Information Visualization group project exploring how routine childhood va
 
 Open the final visualization in a browser:
 
-- **GitHub Pages** (once enabled): [https://sallyjoo18.github.io/information_visualization/](https://sallyjoo18.github.io/information_visualization/)
-- **Preview link** (works now): [htmlpreview](https://htmlpreview.github.io/?https://raw.githubusercontent.com/sallyjoo18/information_visualization/main/final/submission_prototype.html)
+- **Vercel** (recommended): deploy with the steps below → you get a public `*.vercel.app` URL
+- **GitHub Pages** (optional): [https://sallyjoo18.github.io/information_visualization/](https://sallyjoo18.github.io/information_visualization/) — requires repo admin to enable Pages → GitHub Actions
+- **Preview link** (no setup): [htmlpreview](https://htmlpreview.github.io/?https://raw.githubusercontent.com/sallyjoo18/information_visualization/main/final/submission_prototype.html)
 
 Locally, open `final/submission_prototype.html` in a browser, or start from the repo root `index.html` redirect.
+
+## Deploy with Vercel
+
+The repo includes `vercel.json` and a build script that copies the final HTML to a static `dist/` folder.
+
+### Option A — Connect GitHub (best for the team)
+
+1. Push this repo to GitHub (if not already).
+2. Go to [vercel.com/new](https://vercel.com/new) and import `sallyjoo18/information_visualization`.
+3. Leave the defaults — Vercel reads `vercel.json` automatically:
+   - **Build command:** `bash scripts/vercel-build.sh`
+   - **Output directory:** `dist`
+4. Click **Deploy**. Every push to `main` will redeploy automatically.
+
+### Option B — Deploy from your machine (CLI)
+
+```bash
+npm i -g vercel          # one-time
+cd information_visualization
+vercel login             # one-time
+vercel                   # preview deploy
+vercel --prod            # production URL
+```
+
+Share the URL Vercel prints (e.g. `https://information-visualization.vercel.app`).
+
+### Test the build locally
+
+```bash
+bash scripts/vercel-build.sh
+npx serve dist           # optional: preview at http://localhost:3000
+```
 
 ## Repository layout
 
@@ -34,8 +67,11 @@ Locally, open `final/submission_prototype.html` in a browser, or start from the 
 │   ├── global-vaccination-coverage.csv
 │   ├── global-vaccination-coverage.metadata.json
 │   ├── gdp-per-capita-worldbank.csv
-│   ├── countries-110m.json            # Local fallback for world map
-│   └── OWID_README.md                 # Our World in Data data documentation
+│   ├── countries-110m.json
+│   └── OWID_README.md
+├── scripts/
+│   └── vercel-build.sh                # Copies final HTML → dist/ for Vercel
+├── vercel.json                        # Vercel static deploy config
 │
 └── .github/workflows/
     └── deploy-pages.yml               # GitHub Pages deploy on push to main
