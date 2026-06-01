@@ -53,6 +53,9 @@ npx serve dist           # optional: preview at http://localhost:3000
 │
 ├── final/                             # Submission deliverable
 │   ├── submission_prototype.html      # Interactive scrollytelling page (D3)
+│   ├── story-data.js                  # Embedded datasets (also data/story-data.json)
+│   ├── viz-shared.js                  # Scrolly controls, a11y, shared metrics
+│   ├── data/story-data.json           # JSON source for chart data
 │   ├── submission_prototype.pdf       # Exported static PDF
 │   └── export_submission_pdf.mjs      # Regenerate PDF via Puppeteer + Chrome
 │
@@ -96,7 +99,7 @@ Disease colors are consistent throughout: polio (blue), pneumococcal (red), rube
 | `gdp-per-capita-worldbank.csv` | World Bank GDP per capita |
 | `countries-110m.json` | [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth, 110m) |
 
-All chart data for the final HTML is embedded inline; the map tries `data/countries-110m.json` locally, then CDN fallbacks.
+Chart data loads from `final/story-data.js` (see `final/data/story-data.json`); the map tries `countries-110m.json` locally, then CDN fallbacks.
 
 ## Development
 
