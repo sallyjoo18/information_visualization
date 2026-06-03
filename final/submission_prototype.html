@@ -236,6 +236,36 @@
     min-height: 1.5em;
     line-height: 1.5;
   }
+  .scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.65rem;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 400;
+    opacity: 0.55;
+    transition: opacity 0.5s ease;
+  }
+  .scroll-hint.hidden { opacity: 0; pointer-events: none; }
+  .scroll-hint-arrow {
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid var(--text-dim);
+    border-bottom: 1px solid var(--text-dim);
+    transform: rotate(45deg);
+    animation: scrollBounce 2.2s ease-in-out infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(2px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-hint-arrow { animation: none; }
+  }
   .scrolly-triggers { position: relative; z-index: 1; padding-bottom: 18vh; }
   .scrolly-trigger { height: 105vh; }
   .scrolly-trigger-dwell { height: 90vh; min-height: 560px; }
@@ -471,6 +501,10 @@
           <div class="legend" id="legend1"></div>
           <div class="chart-wrap" id="chart1-wrap"><div id="chart1"></div></div>
           <p class="scrolly-stage-note" id="chart1-note"></p>
+          <div class="scroll-hint" id="scroll-hint-rise">
+            <span>Scroll to explore</span>
+            <div class="scroll-hint-arrow"></div>
+          </div>
         </div>
       </div>
       <div class="scrolly-triggers" aria-hidden="true">
@@ -503,6 +537,10 @@
           </div>
           <div class="chart-wrap" id="chart2-wrap"><div id="chart2" class="map-stack"></div></div>
           <p class="scrolly-stage-note" id="scrolly-map-note"></p>
+          <div class="scroll-hint" id="scroll-hint-maps">
+            <span>Scroll to explore</span>
+            <div class="scroll-hint-arrow"></div>
+          </div>
         </div>
       </div>
       <div class="scrolly-triggers" aria-hidden="true">
@@ -535,6 +573,10 @@
           </div>
           <div class="chart-wrap" id="chart3-wrap"><div id="chart3"></div></div>
           <p class="scrolly-stage-note" id="scrolly-note"></p>
+          <div class="scroll-hint" id="scroll-hint-gdp">
+            <span>Scroll to explore</span>
+            <div class="scroll-hint-arrow"></div>
+          </div>
         </div>
       </div>
       <div class="scrolly-triggers" aria-hidden="true">
@@ -852,6 +894,9 @@ function updateChart1Step(step) {
   const prev = chart1State.step;
   if (step === prev) return;
   chart1State.step = step;
+
+  const hint = document.getElementById('scroll-hint-rise');
+  if (hint) hint.classList.toggle('hidden', step > 0);
 
   if (step >= 1) {
     if (prev < 1) animateLineReveal(paths.Polio);
@@ -1216,6 +1261,9 @@ function updateMapStep(step) {
   mapState.step = step;
   const dur = animDur(950);
   const zoomT = step === 0 ? 0 : 1;
+
+  const hint = document.getElementById('scroll-hint-maps');
+  if (hint) hint.classList.toggle('hidden', step > 0);
 
   mapState.panels.forEach(panel => {
     const scale = d3.interpolateNumber(panel.worldView.scale, panel.africaView.scale)(zoomT);
@@ -1632,6 +1680,9 @@ function updateScatterStep(step) {
   scatterState.step = step;
   const { dots, trend, overSet, sudanCallout, sudanRow, smooth } = scatterState;
   const dur = animDur(950);
+
+  const hint = document.getElementById('scroll-hint-gdp');
+  if (hint) hint.classList.toggle('hidden', step > 0);
 
   dots.transition().duration(dur)
     .attr('r', d => {

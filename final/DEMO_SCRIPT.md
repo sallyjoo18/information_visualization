@@ -1,49 +1,63 @@
-# Demo Script — 4 Clips
+# Demo Script — Global Vaccination Coverage
 
 ---
 
-## 1. Global Rise (line chart)
+## Opening, Dataset & Goals
 
-For our first communication goal, to trace the global rise in childhood vaccination, we built a multi-line time series chart. We start with empty axes on purpose — if we showed all three lines at once, then viewers miss the point that vaccination has not always been the status quo and is rather the result of decades of continuous progress. In 1980, fewer than one in four children worldwide received a full course of routine immunization. The blank chart forces that baseline before anything draws in.
+Hello everyone, thank you all for being here today. My name is Daniel, and I am presenting on behalf of Team 15. My other teammates have left for the quarter, so it would just be me today. Anyways, for our visualization, we covered the story of global vaccination from when the movement began about 4 decades ago to today.
 
-We introduce **polio** first (in blue on screen), not because it's the only vaccine that matters, but because it's the longest, most complete series we have. Polio was an early target for mass immunization: visible paralysis, no cure, and a cheap oral vaccine made nationwide campaigns feasible. In **1988**, the World Health Assembly launched the Global Polio Eradication Initiative — the clearest example of vaccination as coordinated global action, and proof that cross-border delivery at scale was possible.
+For our datasets, we have two primary ones. The first is the global vaccination data itself from the WHO covering the past 40 years. It contains data from nearly all countries around the globe for 9 different vaccines. Something of note is that there are missing data points, due to the fact that some nations simply do not gather or report such data, or have inaccuracies, but the gaps are rather minimal and we were still able to construct a very comprehensive visualization.
 
-We then add pneumococcal and rubella in the same frame rather than separate charts. That choice was deliberate: all three rely on the same delivery infrastructure, but their timelines diverge sharply. Pneumococcal didn't roll out globally until around 2008; rubella lagged polio for decades. One chart makes that comparison immediate — progress isn't uniform even at the world-average level.
+Our second dataset is GDP per capita data from the World Bank. We conducted a wealth analysis to vaccination rate across nations which I will elaborate further on in the communication goals.
 
-The WHO **90%** benchmark arrives last for the same reason we held the trend line back in later sections — give viewers the full distribution before adding a reference line. The target is not arbitrary: for many routine vaccines, coverage near **90%** is the level at which enough children are immune that outbreaks struggle to spread; below that, pockets of unvaccinated kids stay vulnerable. Legacy vaccines moved toward the line; newer ones still lag — and world averages hide *where* children are missed. **Bridge to maps:** scroll on; the gaps are geographic.
+So for our communication goals, we had four. First, trace the global rise — how vaccination climbed from almost nothing to near-universal over the past four decades. Second, highlight geographic inequality — show where the gaps actually are on a map and whether the same countries keep falling behind across different vaccines. Third, explore structural drivers — specifically, does national wealth explain who vaccinates well and who does not. That is where the GDP data comes in. And fourth, examine COVID disruption — what happened to all that progress when the pandemic hit. Each of these maps directly to one of our four visualizations, and they are meant to be experienced in order because each one raises the question that the next one answers.
 
----
+A quick note on our design approach: we keep color consistent throughout — polio is always blue, pneumococcal is always red, rubella is always purple — so once you learn it in the first chart, you do not have to relearn it. And we use scrollytelling to build up the data progressively rather than dumping everything on screen at once.
 
-## 2. Geographic Inequality (maps)
-
-For our second communication goal, to highlight geographic inequality, we built three stacked choropleth maps. We start with a world view on purpose — you need to see the whole planet before zooming, or the scale of the problem reads as regional noise instead of a global pattern.
-
-We rejected a single map with a vaccine toggle. Side-by-side maps let you compare across diseases in one glance, and we reuse the same blue-red-purple encoding from the line chart so viewers aren't learning a new color system. When the same pale countries repeat across all three panels, the argument makes itself: this isn't a broken pneumococcal program or a rubella-specific failure — low coverage clusters geographically.
-
-The scroll zoom into Africa is a narrative device, not decoration. Dimming other continents keeps attention on where the shortfall concentrates. Dozens of countries still sit below 70% on all three vaccines — that's the inequality the world-average line was hiding. **Why Africa lags:** rural distance, stock-outs, under-funded primary care, conflict, and displacement slow catch-up more than biology; many countries run strong urban campaigns while the last mile in remote districts is missed year after year. **Bridge to scatter:** next we ask whether wealth and politics explain who beats or falls below the trend.
-
-We end on Sudan because a named country is more memorable than a shaded polygon, and because Sudan carries forward through the rest of the story. At roughly 40% on polio and pneumococcal and 46% on rubella, it's among the lowest anywhere — a concrete answer to the question our first chart raised: if coverage rose globally, who is still being missed?
+Let me walk you through each visualization.
 
 ---
 
-## 3. Wealth & Coverage (scatter plot)
+## Visualization 1 — Global Rise (Line Chart)
 
-For our third communication goal, to explore structural drivers of coverage, we built a GDP scatter plot. We start with the raw scatter on purpose — no trend line yet. If the line appears first, viewers anchor on the average relationship and never really see the spread. Each dot is a country in 2024; color is continent, which encodes region without adding a second chart or a filter control.
+This is our first visualization, a multi-line time series showing world-average coverage from 1980 to 2024.
 
-The dashed trend line comes in on the next beat. Richer countries do vaccinate more on average — we don't want to pretend wealth doesn't matter — but the scatter around that line is wide at every income level. That's the core claim of this visualization: GDP explains part of the pattern, not all of it.
+We start with empty axes on purpose. In 1980, fewer than one in four children received routine immunization, and we want that to sink in before any lines appear. Polio draws in first in blue — it has the longest data series and was the first vaccine to be scaled globally. You will see a marker at 1988 when the WHO launched the Global Polio Eradication Initiative. Then pneumococcal and rubella come in on the same chart. We put all three together so you can immediately see that newer vaccines lag decades behind even though they use the same clinics and cold chains. Finally the WHO 90% target appears — that is the coverage level where outbreaks have trouble spreading. Older vaccines like polio are approaching it, but newer ones like pneumococcal still have a ways to go.
 
-We highlight green overperformers before we highlight Sudan. That ordering matters. These are low-income countries sitting at least eight points above where the trend would predict — proof that strong delivery systems can beat expectations. Showing them first keeps the story from collapsing into "poor countries can't vaccinate." Some can't; some clearly can.
-
-Sudan at the bottom is the counterexample. It sits far below trend at about 40% polio coverage — not because GDP is the whole story, but because conflict, displacement, and a strained health system can break the link between resources and outcomes. Sudan ties this section back to the maps: geography and politics, not income alone. **Bridge to COVID:** then we ask whether four decades of gains could survive a global shock.
+So the global average paints a pretty good picture overall, but it hides where children are actually still being missed. That is what the next visualization digs into.
 
 ---
 
-## 4. COVID Disruption (stat cards + charts)
+## Visualization 2 — Geographic Inequality (Maps)
 
-For our fourth communication goal, to examine COVID disruption, we built stat cards and paired charts. We start with the headline numbers on purpose — before the charts draw in — because the main insight is a contrast, not a single trend. World polio coverage fell five points from 2019 to 2021 (86% → 81%). Myanmar fell fifty-three points, from 90% to 37%. Twenty-one countries lost at least ten. Those two scales of disruption are easy to miss if you open on a line chart alone.
+This is our second visualization — three choropleth maps side by side, one for polio, one for pneumococcal, one for rubella, all showing 2024 data.
 
-The dumbbell chart on the left is doing specific work. It shows before-and-after at the country level, ordered from smallest drop to largest, so the global dip and the national collapses sit in the same view. We use white for 2019 and orange for 2021 here — not the vaccine colors — because this section is about disruption, not disease comparison. We simplified the palette after testing showed too many encodings on one page was hurting readability.
+We went with side-by-side rather than a toggle so you can compare all three at a glance. And what jumps out right away is that the same pale countries show up across all three maps. This is not just one vaccine program failing — low coverage clusters by geography, not by disease.
 
-The timeline on the right brings it back to polio globally: a dip to about 81% in 2021, partial recovery toward 84% by 2024, still below the 2019 peak. The shaded band spans the full chart height so COVID reads as a time window, not just the area under the curve — you see the disruption period even if you never trace the line itself.
+As you scroll, the view zooms into Africa and dims everything else. Dozens of countries here are still below 70% on all three vaccines — and the reasons are structural: rural distance, stock-outs, underfunded primary care, conflict. We end by calling out Sudan specifically — about 40% on polio and pneumococcal, 46% on rubella, some of the lowest numbers anywhere. We highlight it by name because a specific country sticks in your mind more than a shaded polygon, and Sudan keeps coming back throughout the rest of our story.
 
-Together, the two charts defend the section title: a modest global dip and a catastrophic national collapse can coexist. Recovery is real but uneven — which closes the loop on everything we've shown. Averages smooth over gaps that are geographic, economic, and country-specific. Sudan and Myanmar are two faces of the same problem from different angles.
+So now the question becomes: are these geographic clusters just a wealth thing? Is it simply that poorer countries vaccinate less? That is what the next visualization tests.
+
+---
+
+## Visualization 3 — Wealth & Coverage (Scatter Plot)
+
+This is our third visualization — a scatter plot of GDP per capita versus polio coverage for every country in 2024, with GDP on a log scale.
+
+We show the raw scatter first with no trend line so you can take in just how much variation there is at every income level. Then the trend line fades in — richer countries do tend to vaccinate more, but the spread around that line is wide. Wealth explains part of it, but clearly not all of it.
+
+Then we highlight overperformers in green — low-income countries that are beating their predicted coverage by at least eight points. We show these first on purpose, before we show the underperformers, because we do not want the takeaway to be "poor countries cannot vaccinate." Some of them clearly can. Then Sudan appears in orange at the very bottom — far below where the trend line would predict, because conflict and a strained health system break the usual link between income and outcomes.
+
+So after decades of building up this progress, could a single global shock set it back? That is what the last visualization looks at.
+
+---
+
+## Visualization 4 — COVID Disruption (Stat Cards + Charts)
+
+This is our fourth and final visualization.
+
+We lead with stat cards before any charts appear, because the main insight here is a contrast. World polio coverage dropped five points from 2019 to 2021 — 86% down to 81%. But Myanmar dropped fifty-three points, from 90% to 37%. And twenty-one countries lost at least ten. A modest global dip and a catastrophic national collapse happening at the same time — that is easy to miss if you just look at a line chart.
+
+On the left we have a dumbbell chart showing before-and-after at the country level, ordered from smallest drop to largest. We use white and orange here instead of the vaccine colors because this section is about the disruption itself, not comparing diseases. On the right, a timeline of global polio coverage with a shaded band over the COVID years shows the dip and partial recovery. By 2024, the world has come back somewhat but is still sitting below its 2019 peak.
+
+And that is really the message we want to leave you with: childhood vaccination is one of public health's greatest achievements, but the children still being missed are concentrated in the same fragile places, and COVID showed just how quickly decades of progress can slip. Thank you.
