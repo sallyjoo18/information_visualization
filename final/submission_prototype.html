@@ -208,13 +208,13 @@
     width: 100%;
   }
   .scrolly-narrative {
-    font-size: 1.0625rem;
+    font-size: 1.02rem;
     line-height: 1.75;
     color: var(--text-body);
-    max-width: 680px;
+    max-width: 760px;
     margin: 0 auto 1.35rem;
     text-align: center;
-    min-height: 4.8em;
+    min-height: 6.5em;
     transition: opacity 0.55s ease;
   }
   .scrolly-narrative strong { font-weight: 600; }
@@ -466,7 +466,7 @@
     <div class="scrolly-outer" id="scrolly-rise">
       <div class="scrolly-sticky-wrap">
         <div class="chart-card scrolly-chart-card">
-          <p class="scrolly-narrative" id="chart1-narrative" aria-live="polite">1980: fewer than one in four children worldwide received a full course of routine immunization.</p>
+          <p class="scrolly-narrative" id="chart1-narrative" aria-live="polite">1980: fewer than one in four children worldwide received a full course of routine immunization. The rise that follows did not happen evenly — one disease anchored the first global push.</p>
           <div class="chart-eyebrow">World average · 1980–2024</div>
           <div class="legend" id="legend1"></div>
           <div class="chart-wrap" id="chart1-wrap"><div id="chart1"></div></div>
@@ -496,7 +496,7 @@
     <div class="scrolly-outer" id="scrolly-maps">
       <div class="scrolly-sticky-wrap">
         <div class="chart-card scrolly-chart-card">
-          <p class="scrolly-narrative" id="scrolly-map-narrative" aria-live="polite">Pale countries repeat across all three vaccines — the gap is geographic, not vaccine-specific.</p>
+          <p class="scrolly-narrative" id="scrolly-map-narrative" aria-live="polite">The same pale countries repeat across all three vaccines — low coverage clusters by place, not by disease.</p>
           <div class="chart-eyebrow">Country coverage · 2024</div>
           <div class="scrolly-chart-header">
             <div class="chart-stats" id="map-stats"></div>
@@ -527,7 +527,7 @@
     <div class="scrolly-outer" id="scrolly-gdp">
       <div class="scrolly-sticky-wrap">
         <div class="chart-card scrolly-chart-card">
-          <p class="scrolly-narrative" id="scrolly-narrative" aria-live="polite">Each dot is a country. Color follows continent — the upward drift is real, but the spread at any income level is wide.</p>
+          <p class="scrolly-narrative" id="scrolly-narrative" aria-live="polite">Each dot is a country in 2024; color is continent. Richer places sit higher on average, but coverage varies widely at every income level.</p>
           <div class="chart-eyebrow">Polio coverage vs. GDP per capita · 2024</div>
           <div class="scrolly-chart-header">
             <div class="legend" id="legend3"></div>
@@ -794,10 +794,10 @@ window.addEventListener('resize', () => {
 
 // ─── CHART 1: SCROLLY GLOBAL RISE (POLIO FIRST) ─────────────────────────────
 const CHART1_NARRATIVES = [
-  '1980: fewer than one in four children worldwide received a full course of routine immunization.',
-  'Polio led the way — the 1988 global eradication initiative turned vaccination into one of the largest coordinated public-health campaigns in history.',
-  'Newer rollouts moved slowly. <strong style="color:#ef4444">Pneumococcal</strong> (2008) arrived late — and <strong style="color:#a855f7">rubella</strong> stayed far below polio for decades before climbing.',
-  'In 2012 the WHO set a <strong style="color:#22c55e">90% coverage target</strong> — routine coverage climbed, but newer vaccines still lagged the benchmark.',
+  '1980: fewer than one in four children worldwide received a full course of routine immunization. The rise that follows did not happen evenly — one disease anchored the first global push.',
+  '<strong style="color:#3b82f6">Polio</strong> was among the first vaccines scaled worldwide: visible paralysis, no cure, and a cheap oral vaccine made mass campaigns feasible. In <strong style="color:#3b82f6">1988</strong>, the World Health Assembly launched the Global Polio Eradication Initiative — proof that countries could coordinate delivery across borders at a scale never attempted before.',
+  'Newer rollouts moved slowly. <strong style="color:#ef4444">Pneumococcal</strong> (global scale-up from ~2008) arrived decades after polio — and <strong style="color:#a855f7">rubella</strong> lagged for years. Same cold chains and clinics; adding a new antigen is often harder than sustaining an old one.',
+  'In 2012 the WHO set a <strong style="color:#22c55e">90% coverage target</strong> for routine immunization — not an arbitrary round number. For many vaccines, population coverage needs to stay near <strong style="color:#22c55e">90%</strong> so enough children are immune that outbreaks cannot easily spread; below that, “pockets” of unvaccinated kids remain vulnerable. Legacy vaccines climbed toward the line; newer ones still trailed — so where are children actually still being missed, and do those gaps cluster geographically?',
 ];
 
 function animateLineReveal(path, duration = 1200) {
@@ -1202,9 +1202,9 @@ function renderChart2Maps(container, world) {
 }
 
 const MAP_SCROLLY_NARRATIVES = [
-  'The same low-coverage countries repeat across all three vaccines — the gap is geographic, not vaccine-specific.',
-  'Zooming in, the shortfall concentrates in <strong>Africa</strong> — dozens of countries still below 70% on polio, pneumococcal, and rubella.',
-  '<strong style="color:#f97316">Sudan</strong> sits among the lowest on all three vaccines — 40% polio, 40% pneumococcal, 46% rubella — lagging far behind neighbors and the world average.',
+  'The same pale countries repeat across all three vaccines — this is not a broken pneumococcal program or a rubella-only failure. Low coverage <strong>clusters by place</strong>, not by disease.',
+  'Zooming in, the shortfall concentrates in <strong>Africa</strong> — dozens of countries still below 70% on polio, pneumococcal, and rubella. Distance to rural clinics, stock-outs, under-funded primary care, conflict, and repeated displacement all slow catch-up — not lack of will. Many countries run strong campaigns in cities while the last mile in remote districts is missed year after year — so do wealth and politics, not just geography, explain who vaccinates well?',
+  '<strong style="color:#f97316">Sudan</strong> sits among the lowest on all three vaccines — 40% polio, 40% pneumococcal, 46% rubella — a case of chronic fragility, not one weak program. If maps show where gaps live, what happens when every country is plotted against GDP?',
 ];
 
 function updateMapNarrative(step) {
@@ -1617,10 +1617,10 @@ function updateScatterLegend(step) {
 }
 
 const SCROLLY_NARRATIVES = [
-  'Each dot is a country. Color follows continent — the upward drift is real, but the spread at any income level is wide.',
-  'The dashed trend line shows the average relationship: richer countries vaccinate more. Wealth explains part of the story, not all of it.',
-  'The <strong style="color:#22c55e">green dots</strong> are low-income countries with strong routine vaccination programs — each sits at least 8 points above where GDP alone would predict. Hover any dot for details.',
-  'At the opposite end, <strong style="color:#f97316">Sudan</strong> sits far below the trend — just 40% polio coverage in 2024, among the lowest on Earth. Conflict, displacement, and a hollowed-out health system leave millions of children unprotected.',
+  'Each dot is a country in 2024; color is continent. Richer places sit higher on average, but at every income level some countries vaccinate far better than others — the map’s geographic clusters are only part of the story.',
+  'The dashed trend line is the average link between GDP and polio coverage: wealth buys cold chains, paid staff, and reliable supply. The wide scatter at any income level shows GDP explains <strong>part</strong> of the pattern, not all of it.',
+  'The <strong style="color:#22c55e">green dots</strong> are low-income countries at least 8 points above trend — proof that delivery systems, not income alone, drive outcomes. Hover any dot for details.',
+  'At the opposite end, <strong style="color:#f97316">Sudan</strong> sits far below trend at ~40% polio — conflict and a hollowed-out health system break the usual income link. After decades of uneven progress, could a global shock like COVID undo what countries had built?',
 ];
 
 function updateScrollyNarrative(step) {
